@@ -4,6 +4,37 @@ import { getStoredValue, setStoredValue } from './storage'
 
 const STORAGE_KEY = 'digitory-products'
 
+// 🔥 DEMO LOGIC - toggle USE_DEMO to switch between demo and real API logic
+import { mockProducts } from '../data/mockProducts'
+
+const USE_DEMO = true // 🔥 toggle this
+
+export const fetchProducts = async () => {
+  if (USE_DEMO) {
+    return new Promise((resolve) => {
+      setTimeout(() => resolve(mockProducts), 600) // simulate loading
+    })
+  }
+
+  // real API logic here
+  const res = await fetch('/api/products')
+  return res.json()
+}
+
+export const fetchProductBySlug = async (slug) => {
+  if (USE_DEMO) {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(mockProducts.find((p) => p.slug === slug))
+      }, 400)
+    })
+  }
+
+  const res = await fetch(`/api/products/${slug}`)
+  return res.json()
+}
+// End of demo logic
+
 const ensureLocalProducts = () => {
   const stored = getStoredValue(STORAGE_KEY, null)
   if (!Array.isArray(stored) || stored.length === 0) {
