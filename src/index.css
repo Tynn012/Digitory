@@ -130,7 +130,7 @@ p {
   padding: 12px 22px;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -155,6 +155,40 @@ p {
 
 .button:hover {
   transform: translateY(-2px);
+}
+
+.button:active {
+  transform: translateY(0);
+}
+
+.button:focus-visible {
+  outline: 2px solid rgba(27, 179, 168, 0.45);
+  outline-offset: 3px;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.button.primary:hover {
+  box-shadow: 0 18px 40px rgba(27, 179, 168, 0.25);
+}
+
+.button.primary:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.button.ghost:hover {
+  background: rgba(27, 179, 168, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(27, 179, 168, 0.35);
+}
+
+.button.danger:hover {
+  background: rgba(184, 75, 63, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(184, 75, 63, 0.25);
 }
 
 .site-header {
@@ -209,10 +243,40 @@ p {
 .nav-link {
   color: var(--muted);
   font-weight: 600;
+  position: relative;
+  padding: 6px 2px;
+  transition: color 0.2s ease;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 0;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--accent);
+  transition: width 0.2s ease;
+}
+
+.nav-link:hover {
+  color: var(--ink);
 }
 
 .nav-link.active {
   color: var(--ink);
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+  width: 100%;
+}
+
+.nav-link:focus-visible {
+  outline: 2px solid rgba(27, 179, 168, 0.45);
+  outline-offset: 6px;
+  border-radius: 999px;
 }
 
 .hero {
@@ -668,11 +732,27 @@ p {
   border-radius: var(--radius-sm);
   color: var(--muted);
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-nav a:hover {
+  background: rgba(27, 179, 168, 0.08);
+  color: var(--ink);
+  transform: translateX(4px);
 }
 
 .admin-nav a.active {
-  background: rgba(27, 179, 168, 0.12);
+  background: rgba(27, 179, 168, 0.15);
   color: var(--accent);
+  box-shadow: inset 0 0 0 1px rgba(27, 179, 168, 0.2);
+}
+
+.admin-nav a:focus-visible {
+  outline: 2px solid rgba(27, 179, 168, 0.4);
+  outline-offset: 3px;
 }
 
 .admin-content {
