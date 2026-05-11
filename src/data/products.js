@@ -1,0 +1,159 @@
+import { createPlaceholderImage } from './placeholders'
+
+export const categories = [
+  'Budget Templates',
+  'Productivity Sheets',
+  'Finance Trackers',
+  'Study Planners',
+  'Printable Assets',
+  'Digital Cards',
+]
+
+export const seedProducts = [
+  {
+    id: 'prod_1',
+    title: 'Budget Glow Sheet',
+    slug: 'budget-glow-sheet',
+    description:
+      'A clean monthly budget spreadsheet with cashflow summaries, expense heatmaps, and goal tracking tabs.',
+    price: 249,
+    category: 'Budget Templates',
+    featured: true,
+    thumbnail: createPlaceholderImage('Budget Glow', 'mint'),
+    images: [
+      createPlaceholderImage('Budget Glow', 'mint'),
+      createPlaceholderImage('Budget Overview', 'sun'),
+      createPlaceholderImage('Spending Map', 'sky'),
+    ],
+    tags: ['budget', 'monthly', 'spreadsheet'],
+    digital_file_url: '',
+    metadata: { format: 'xlsx', pages: 12 },
+  },
+  {
+    id: 'prod_2',
+    title: 'Weekly Focus Planner',
+    slug: 'weekly-focus-planner',
+    description:
+      'Plan your week with time blocks, priority lanes, and a review space that keeps goals aligned.',
+    price: 199,
+    category: 'Productivity Sheets',
+    featured: true,
+    thumbnail: createPlaceholderImage('Weekly Focus', 'coral'),
+    images: [
+      createPlaceholderImage('Weekly Focus', 'coral'),
+      createPlaceholderImage('Priority Lanes', 'mint'),
+      createPlaceholderImage('Weekly Review', 'sun'),
+    ],
+    tags: ['weekly', 'planning', 'focus'],
+    digital_file_url: '',
+    metadata: { format: 'pdf', pages: 6 },
+  },
+  {
+    id: 'prod_3',
+    title: 'Debt Snowball Tracker',
+    slug: 'debt-snowball-tracker',
+    description:
+      'Track balances, interest, and payoff progress with auto-updated charts and milestone prompts.',
+    price: 299,
+    category: 'Finance Trackers',
+    featured: false,
+    thumbnail: createPlaceholderImage('Debt Snowball', 'sky'),
+    images: [
+      createPlaceholderImage('Debt Snowball', 'sky'),
+      createPlaceholderImage('Payoff Curve', 'mint'),
+    ],
+    tags: ['finance', 'tracker', 'debt'],
+    digital_file_url: '',
+    metadata: { format: 'xlsx', pages: 9 },
+  },
+  {
+    id: 'prod_4',
+    title: 'Study Sprint Planner',
+    slug: 'study-sprint-planner',
+    description:
+      'Designed for students who want structured daily sessions, revision checklists, and exam prep maps.',
+    price: 159,
+    category: 'Study Planners',
+    featured: true,
+    thumbnail: createPlaceholderImage('Study Sprint', 'sun'),
+    images: [
+      createPlaceholderImage('Study Sprint', 'sun'),
+      createPlaceholderImage('Revision Grid', 'coral'),
+    ],
+    tags: ['study', 'planner', 'exam'],
+    digital_file_url: '',
+    metadata: { format: 'pdf', pages: 8 },
+  },
+  {
+    id: 'prod_5',
+    title: 'Printable Habit Garden',
+    slug: 'printable-habit-garden',
+    description:
+      'A printable habit tracker with seasonal themes, streak boosters, and gratitude prompts.',
+    price: 139,
+    category: 'Printable Assets',
+    featured: false,
+    thumbnail: createPlaceholderImage('Habit Garden', 'mint'),
+    images: [
+      createPlaceholderImage('Habit Garden', 'mint'),
+      createPlaceholderImage('Streak Boost', 'sun'),
+    ],
+    tags: ['printable', 'habits', 'wellness'],
+    digital_file_url: '',
+    metadata: { format: 'pdf', pages: 4 },
+  },
+  {
+    id: 'prod_6',
+    title: 'Digital Gratitude Cards',
+    slug: 'digital-gratitude-cards',
+    description:
+      'A set of warm, minimal digital cards for thank you notes, client follow-ups, and milestones.',
+    price: 129,
+    category: 'Digital Cards',
+    featured: false,
+    thumbnail: createPlaceholderImage('Gratitude Cards', 'coral'),
+    images: [
+      createPlaceholderImage('Gratitude Cards', 'coral'),
+      createPlaceholderImage('Soft Thanks', 'sky'),
+    ],
+    tags: ['cards', 'gratitude', 'digital'],
+    digital_file_url: '',
+    metadata: { format: 'png', pages: 10 },
+  },
+  {
+    id: 'prod_7',
+    title: 'Monthly Cashflow Dashboard',
+    slug: 'monthly-cashflow-dashboard',
+    description:
+      'A dashboard for income streams, subscriptions, and savings with month-over-month insights.',
+    price: 349,
+    category: 'Finance Trackers',
+    featured: true,
+    thumbnail: createPlaceholderImage('Cashflow Dashboard', 'sky'),
+    images: [
+      createPlaceholderImage('Cashflow Dashboard', 'sky'),
+      createPlaceholderImage('Income Split', 'mint'),
+    ],
+    tags: ['finance', 'dashboard', 'cashflow'],
+    digital_file_url: '',
+    metadata: { format: 'xlsx', pages: 7 },
+  },
+  {
+    id: 'prod_8',
+    title: 'Creator Launch Kit',
+    slug: 'creator-launch-kit',
+    description:
+      'Plan launches with timeline templates, promotion checklists, and revenue goals in one system.',
+    price: 399,
+    category: 'Productivity Sheets',
+    featured: false,
+    thumbnail: createPlaceholderImage('Creator Launch', 'sun'),
+    images: [
+      createPlaceholderImage('Creator Launch', 'sun'),
+      createPlaceholderImage('Promo Timeline', 'coral'),
+    ],
+    tags: ['launch', 'creator', 'planning'],
+    digital_file_url: '',
+    metadata: { format: 'notion', pages: 1 },
+  },
+]
