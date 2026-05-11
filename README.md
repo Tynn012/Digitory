@@ -29,6 +29,13 @@ Digitory is a premium digital marketplace and admin dashboard for selling templa
 - Build for production: npm run build
 - Preview the production build: npm run preview
 
+## Deployment
+1. Run npm run build and deploy the dist folder.
+2. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY as environment variables on your host.
+3. Configure a single-page app rewrite so all routes serve /index.html.
+4. Set the production Site URL in Supabase Auth settings.
+5. Verify admin login, checkout submission, and payment proof uploads on the live site.
+
 ## Notes
 - Replace the placeholder GCash QR image with your real QR asset before launch.
 - Update branding values from the admin dashboard to keep the hero content current.
