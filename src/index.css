@@ -700,6 +700,7 @@ p {
   display: grid;
   grid-template-columns: 260px 1fr;
   min-height: calc(100vh - 74px);
+  align-items: start;
 }
 
 .admin-sidebar {
@@ -708,6 +709,10 @@ p {
   display: grid;
   gap: 24px;
   background: #fff;
+  width: 260px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
 }
 
 .admin-brand {
@@ -759,6 +764,7 @@ p {
   padding: 32px;
   display: grid;
   gap: 24px;
+  min-width: 0;
 }
 
 .admin-top {
@@ -821,6 +827,24 @@ p {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+.admin-shell .button {
+  min-height: 40px;
+  padding: 0 16px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.admin-sidebar .button {
+  width: 100%;
+  justify-content: center;
+}
+
+.product-admin-actions .button,
+.order-actions .button {
+  min-width: 110px;
+  justify-content: center;
 }
 
 .order-table {
@@ -910,6 +934,9 @@ p {
   .admin-sidebar {
     border-right: none;
     border-bottom: 1px solid var(--border);
+    position: relative;
+    width: 100%;
+    height: auto;
   }
 
   .order-row {
