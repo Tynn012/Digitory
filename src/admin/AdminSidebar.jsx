@@ -24,7 +24,11 @@ const AdminSidebar = () => {
         <NavLink to="/admin/orders">Orders</NavLink>
         <NavLink to="/admin/branding">Branding</NavLink>
       </nav>
-      <button type="button" className="button ghost" onClick={handleSignOut}>
+      <button
+        type="button"
+        className="button ghost admin-signout"
+        onClick={handleSignOut}
+      >
         Sign out
       </button>
     </aside>

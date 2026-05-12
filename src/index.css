@@ -837,8 +837,15 @@ p {
 }
 
 .admin-sidebar .button {
-  width: 100%;
   justify-content: center;
+  align-self: start;
+}
+
+.admin-signout {
+  min-height: 34px;
+  padding: 0 14px;
+  font-size: 14px;
+  width: auto;
 }
 
 .product-admin-actions .button,
