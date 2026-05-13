@@ -1032,6 +1032,44 @@ p {
   }
 }
 
+/* Header brand + badge mobile fixes */
+@media (max-width: 720px) {
+  .container.nav-bar {
+    padding: 12px 0;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .brand-text {
+    font-size: 18px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 60%;
+  }
+
+  .brand-badge {
+    padding: 6px 10px;
+    font-size: 12px;
+    line-height: 1;
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .nav-actions {
+    order: 2;
+    margin-left: auto;
+  }
+}
+
 @media (max-width: 720px) {
   .nav-links {
     display: none;
