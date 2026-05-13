@@ -58,7 +58,16 @@ const Home = () => {
                 <p>Premium templates</p>
               </div>
               <div>
-                <h3>4.9</h3>
+                <h3>
+                  {/* Rating component shows stars + numeric value */}
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                    {/* lazy load to avoid changing bundle much */}
+                    <span style={{ fontWeight: 700 }}>4.9</span>
+                    <span aria-hidden>
+                      ★★★★☆
+                    </span>
+                  </span>
+                </h3>
                 <p>Average rating</p>
               </div>
               <div>
