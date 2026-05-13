@@ -963,6 +963,75 @@ p {
   }
 }
 
+/* Mobile tweaks to improve symmetry, prevent overlap, and fit text */
+@media (max-width: 720px) {
+  .button {
+    padding: 10px 12px;
+    font-size: 15px;
+    border-radius: 12px;
+    white-space: normal;
+    min-height: 40px;
+  }
+
+  .nav-actions .button {
+    padding: 10px 12px;
+  }
+
+  .pill {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+
+  .badge {
+    top: 10px;
+    left: 10px;
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+
+  .product-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .product-meta .button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .product-body {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .image-placeholder {
+    height: 160px;
+  }
+
+  .product-price {
+    font-size: 22px;
+  }
+
+  .product-admin-actions .button,
+  .order-actions .button,
+  .admin-shell .button {
+    min-width: auto;
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+
+  .detail-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .download-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
 @media (max-width: 720px) {
   .nav-links {
     display: none;
