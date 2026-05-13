@@ -5,6 +5,9 @@ const AuthContext = createContext({
   session: null,
   loading: true,
   configMissing: false,
+  isAdmin: false,
+  adminLoading: false,
+  adminError: '',
   signIn: async () => ({ data: null, error: null }),
   signOut: async () => {},
 })
@@ -12,6 +15,9 @@ const AuthContext = createContext({
 export const AuthProvider = ({ children }) => {
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [adminLoading, setAdminLoading] = useState(true)
+  const [adminError, setAdminError] = useState('')
   const configMissing = !isSupabaseConfigured
 
   useEffect(() => {
@@ -36,6 +42,56 @@ export const AuthProvider = ({ children }) => {
     }
   }, [configMissing])
 
+  useEffect(() => {
+    let active = true
+
+    if (configMissing || !supabase) {
+      setIsAdmin(false)
+      setAdminError('')
+      setAdminLoading(false)
+      return () => {
+        active = false
+      }
+    }
+
+    if (!session) {
+      setIsAdmin(false)
+      setAdminError('')
+      setAdminLoading(false)
+      return () => {
+        active = false
+      }
+    }
+
+    setAdminLoading(true)
+    supabase
+      .from('admin_users')
+      .select('user_id, role')
+      .eq('user_id', session.user.id)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (!active) return
+        if (error) {
+          setAdminError(
+            'Admin role check failed. Ensure schema.sql has been applied.',
+          )
+          setIsAdmin(false)
+          return
+        }
+        setAdminError('')
+        setIsAdmin(Boolean(data))
+      })
+      .finally(() => {
+        if (active) {
+          setAdminLoading(false)
+        }
+      })
+
+    return () => {
+      active = false
+    }
+  }, [configMissing, session])
+
   const signIn = async (email, password) => {
     if (configMissing || !supabase) {
       return { data: null, error: { message: 'Supabase is not configured.' } }
@@ -50,8 +106,17 @@ export const AuthProvider = ({ children }) => {
   }
 
   const value = useMemo(
-    () => ({ session, loading, configMissing, signIn, signOut }),
-    [session, loading, configMissing],
+    () => ({
+      session,
+      loading,
+      configMissing,
+      isAdmin,
+      adminLoading,
+      adminError,
+      signIn,
+      signOut,
+    }),
+    [session, loading, configMissing, isAdmin, adminLoading, adminError],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

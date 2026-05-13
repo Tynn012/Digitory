@@ -31,9 +31,6 @@ const SiteHeader = () => {
           >
             Products
           </NavLink>
-          <NavLink to="/admin" className="nav-link">
-            Admin
-          </NavLink>
         </nav>
         <div className="nav-actions">
           <Link to="/products" className="button primary">

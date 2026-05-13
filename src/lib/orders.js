@@ -3,6 +3,13 @@ import { getStoredValue, setStoredValue } from './storage'
 
 const STORAGE_KEY = 'digitory-orders'
 
+const createDownloadToken = () => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID()
+  }
+  return `dl-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+}
+
 const ensureLocalOrders = () => {
   const stored = getStoredValue(STORAGE_KEY, null)
   if (!Array.isArray(stored)) {
@@ -18,11 +25,16 @@ const createOrderPayload = (payload) => ({
   product_title: payload.product_title || '',
   amount: Number(payload.amount || 0),
   customer_name: payload.customer_name || '',
+  buyer_email: payload.buyer_email ? payload.buyer_email.trim().toLowerCase() : '',
   gcash_reference: payload.gcash_reference || '',
   proof_url: payload.proof_url || null,
   status: payload.status || 'pending',
   paid_at: payload.paid_at || null,
   download_unlocked: Boolean(payload.download_unlocked),
+  download_token: payload.download_token || createDownloadToken(),
+  download_url: payload.download_url ? payload.download_url.trim() : '',
+  payment_method: payload.payment_method || 'manual_gcash',
+  receipt_sent_at: payload.receipt_sent_at || null,
   metadata: payload.metadata || {},
 })
 
@@ -131,3 +143,16 @@ export const deleteOrder = async (id) => {
   setStoredValue(STORAGE_KEY, next)
   return true
 }
+
+export const fetchDownloadDetails = async (token) => {
+  if (!supabase) {
+    throw new Error('Supabase is not configured.')
+  }
+  const { data, error } = await supabase.functions.invoke('get-download', {
+    body: { token },
+  })
+  if (error) throw error
+  return data
+}
+
+export { createDownloadToken }

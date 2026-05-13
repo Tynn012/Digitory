@@ -24,6 +24,26 @@ Digitory is a premium digital marketplace and admin dashboard for selling templa
 ## Supabase setup
 1. Run the SQL in supabase/schema.sql to create tables and policies.
 2. Create a public storage bucket named order-proofs if you want to store payment proof uploads.
+3. Add your admin user after signing up in Supabase Auth:
+	insert into admin_users (user_id) values ('<your-auth-user-id>');
+
+## Payments
+- Manual GCash is enabled by default.
+- Switch to gateway mode later by setting VITE_PAYMENT_MODE=gateway.
+
+## Email receipts + download links
+This project sends download links through a Supabase Edge Function and an email provider.
+
+1. Create a Resend account and verify your sender domain.
+2. Set Supabase secrets:
+	RESEND_API_KEY
+	FROM_EMAIL
+	SITE_URL (e.g. https://digitory.com)
+	Note: SUPABASE_SERVICE_ROLE_KEY is provided automatically by Supabase for
+	Edge Functions. Do not add it manually as a custom secret.
+3. Deploy the functions:
+	supabase functions deploy send-receipt
+	supabase functions deploy get-download
 
 ## Build and preview
 - Build for production: npm run build

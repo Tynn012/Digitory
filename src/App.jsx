@@ -6,6 +6,7 @@ import Home from './pages/Home'
 import Products from './pages/Products'
 import ProductDetail from './pages/ProductDetail'
 import Checkout from './pages/Checkout'
+import Download from './pages/Download'
 import NotFound from './pages/NotFound'
 import AdminLogin from './admin/AdminLogin'
 import AdminLayout from './admin/AdminLayout'
@@ -24,6 +25,7 @@ function App() {
           <Route path="products" element={<Products />} />
           <Route path="products/:slug" element={<ProductDetail />} />
           <Route path="checkout/:slug" element={<Checkout />} />
+          <Route path="download/:token" element={<Download />} />
         </Route>
         <Route path="admin" element={<AdminLogin />} />
         <Route

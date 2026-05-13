@@ -156,4 +156,58 @@ export const seedProducts = [
     digital_file_url: '',
     metadata: { format: 'notion', pages: 1 },
   },
+  {
+    id: 'prod_9',
+    title: 'Meal Plan and Grocery OS',
+    slug: 'meal-plan-grocery-os',
+    description:
+      'A weekly meal planning system with auto-sorted grocery lists and pantry tracking.',
+    price: 229,
+    category: 'Productivity Sheets',
+    featured: false,
+    thumbnail: createPlaceholderImage('Meal Plan OS', 'mint'),
+    images: [
+      createPlaceholderImage('Meal Plan OS', 'mint'),
+      createPlaceholderImage('Grocery List', 'sun'),
+    ],
+    tags: ['meal-plan', 'grocery', 'home'],
+    digital_file_url: '',
+    metadata: { format: 'xlsx', pages: 5 },
+  },
+  {
+    id: 'prod_10',
+    title: 'Client Invoice Pack',
+    slug: 'client-invoice-pack',
+    description:
+      'Professional invoice, quote, and payment reminder templates for freelancers and studios.',
+    price: 279,
+    category: 'Printable Assets',
+    featured: true,
+    thumbnail: createPlaceholderImage('Invoice Pack', 'coral'),
+    images: [
+      createPlaceholderImage('Invoice Pack', 'coral'),
+      createPlaceholderImage('Quote Template', 'sky'),
+    ],
+    tags: ['invoice', 'freelance', 'business'],
+    digital_file_url: '',
+    metadata: { format: 'pdf', pages: 14 },
+  },
+  {
+    id: 'prod_11',
+    title: 'Notion Reading Vault',
+    slug: 'notion-reading-vault',
+    description:
+      'A reading and highlights tracker with notes pipeline, rating matrix, and yearly stats.',
+    price: 189,
+    category: 'Study Planners',
+    featured: false,
+    thumbnail: createPlaceholderImage('Reading Vault', 'sky'),
+    images: [
+      createPlaceholderImage('Reading Vault', 'sky'),
+      createPlaceholderImage('Highlights Board', 'mint'),
+    ],
+    tags: ['notion', 'reading', 'knowledge'],
+    digital_file_url: '',
+    metadata: { format: 'notion', pages: 1 },
+  },
 ]
