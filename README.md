@@ -59,3 +59,7 @@ This project sends download links through a Supabase Edge Function and an email 
 ## Notes
 - Replace the placeholder GCash QR image with your real QR asset before launch.
 - Update branding values from the admin dashboard to keep the hero content current.
+
+## Documentation
+- Student project report: `docs/PROJECT_DOCUMENTATION.md`
+- Technical guide: `docs/TECHNICAL_DOCUMENTATION.md`

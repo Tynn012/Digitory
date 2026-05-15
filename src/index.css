@@ -711,8 +711,8 @@ p {
 .admin-shell {
   display: grid;
   grid-template-columns: 260px 1fr;
-  min-height: calc(100vh - 74px);
-  align-items: start;
+  min-height: 100dvh;
+  align-items: stretch;
 }
 
 .admin-sidebar {
@@ -724,18 +724,28 @@ p {
   width: 260px;
   position: sticky;
   top: 0;
-  height: 100vh;
+  min-height: 100dvh;
 }
 
 .admin-brand {
   display: grid;
-  gap: 6px;
+  gap: 4px;
+}
+
+.admin-brand-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  line-height: 1.15;
+  letter-spacing: -0.4px;
+  color: var(--ink);
+  overflow-wrap: anywhere;
 }
 
 .admin-subtitle {
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 1px;
+  line-height: 1.3;
   color: var(--muted);
 }
 
@@ -777,6 +787,7 @@ p {
   display: grid;
   gap: 24px;
   min-width: 0;
+  min-height: 100dvh;
 }
 
 .admin-top {
@@ -948,6 +959,7 @@ p {
 
   .admin-shell {
     grid-template-columns: 1fr;
+    min-height: auto;
   }
 
   .admin-sidebar {
@@ -955,7 +967,7 @@ p {
     border-bottom: 1px solid var(--border);
     position: relative;
     width: 100%;
-    height: auto;
+    min-height: auto;
   }
 
   .order-row {
@@ -1029,6 +1041,11 @@ p {
   .download-actions {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .admin-brand-title {
+    font-size: 21px;
+    line-height: 1.2;
   }
 }
 

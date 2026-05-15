@@ -15,7 +15,7 @@ const AdminSidebar = () => {
   return (
     <aside className="admin-sidebar">
       <div className="admin-brand">
-        <span className="brand-text">{branding.site_name || 'Digitory'}</span>
+        <span className="admin-brand-title">{branding.site_name || 'Digitory'}</span>
         <span className="admin-subtitle">Admin Dashboard</span>
       </div>
       <nav className="admin-nav">
