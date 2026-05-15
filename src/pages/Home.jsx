@@ -87,12 +87,16 @@ const Home = () => {
                 <p>Cashflow + savings</p>
               </div>
               <div>
-                <p className="label">Study Planners</p>
-                <p>Exam sprint maps</p>
+                <p className="label">Productivity Sheets</p>
+                <p>Weekly focus systems</p>
               </div>
               <div>
-                <p className="label">Digital Cards</p>
-                <p>Minimal thank yous</p>
+                <p className="label">Finance Trackers</p>
+                <p>Income and expense views</p>
+              </div>
+              <div>
+                <p className="label">Study Planners</p>
+                <p>Exam sprint maps</p>
               </div>
             </div>
           </div>

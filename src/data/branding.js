@@ -2,7 +2,7 @@ export const defaultBranding = {
   site_name: 'Digitory',
   hero_title: 'Premium digital tools for modern planning.',
   hero_subtitle:
-    'Shop curated templates, trackers, and printable assets designed for clarity, speed, and calm.',
+    'Shop curated budget templates, productivity sheets, finance trackers, and study planners designed for clarity, speed, and calm.',
   logo_url: '',
   accent_primary: '#1bb3a8',
   accent_secondary: '#ff8a5b',

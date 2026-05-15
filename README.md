@@ -57,7 +57,7 @@ This project sends download links through a Supabase Edge Function and an email 
 5. Verify admin login, checkout submission, and payment proof uploads on the live site.
 
 ## Notes
-- Replace the placeholder GCash QR image with your real QR asset before launch.
+- Add your GCash QR image before launch.
 - Update branding values from the admin dashboard to keep the hero content current.
 
 ## Documentation

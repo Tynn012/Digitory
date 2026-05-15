@@ -105,14 +105,10 @@ const Checkout = () => {
                 </div>
                 <img
                   src={createQrPlaceholder()}
-                  alt="GCash QR placeholder"
+                  alt="GCash QR code"
                   className="qr-placeholder"
                 />
               </div>
-              <p className="muted">
-                Replace the placeholder QR with your real GCash QR image in
-                production.
-              </p>
             </>
           ) : (
             <div className="notice-card">

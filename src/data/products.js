@@ -6,7 +6,6 @@ export const categories = [
   'Finance Trackers',
   'Study Planners',
   'Printable Assets',
-  'Digital Cards',
 ]
 
 export const seedProducts = [
@@ -104,19 +103,19 @@ export const seedProducts = [
   },
   {
     id: 'prod_6',
-    title: 'Digital Gratitude Cards',
+    title: 'Digital Gratitude Notes',
     slug: 'digital-gratitude-cards',
     description:
-      'A set of warm, minimal digital cards for thank you notes, client follow-ups, and milestones.',
+      'A set of warm, minimal notes for thank you messages, client follow-ups, and milestones.',
     price: 129,
-    category: 'Digital Cards',
+    category: 'Productivity Sheets',
     featured: false,
     thumbnail: createPlaceholderImage('Gratitude Cards', 'coral'),
     images: [
       createPlaceholderImage('Gratitude Cards', 'coral'),
       createPlaceholderImage('Soft Thanks', 'sky'),
     ],
-    tags: ['cards', 'gratitude', 'digital'],
+    tags: ['notes', 'gratitude', 'digital'],
     digital_file_url: '',
     metadata: { format: 'png', pages: 10 },
   },

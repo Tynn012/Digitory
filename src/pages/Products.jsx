@@ -41,14 +41,17 @@ const Products = () => {
       <div className="container section-heading">
         <div>
           <h2>All products</h2>
-          <p>Browse premium assets built for creators and planners.</p>
+          <p>
+            Browse budget templates, productivity sheets, finance trackers, and
+            study planners.
+          </p>
         </div>
       </div>
       <div className="container product-filters">
         <SearchBar
           value={search}
           onChange={setSearch}
-          placeholder="Search planners, templates, trackers"
+          placeholder="Search budget templates, productivity sheets, finance trackers, study planners"
         />
         <div className="pill-row">
           {filters.map((item) => (
