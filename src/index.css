@@ -217,9 +217,9 @@ p {
 
 .brand-logo {
   border-radius: 0px;
-  /* Reduced ~15% from 213x67 */
-  width: 181px;
-  height: 57px;
+
+  width: 191px;
+  height: 60px;
   object-fit: cover;
 }
 
