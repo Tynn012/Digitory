@@ -12,9 +12,9 @@ const normalizeBranding = (branding) => ({
 
 const applyBranding = (branding) => {
   if (typeof document === 'undefined') return
-  const root = document.documentElement
-  root.style.setProperty('--accent', branding.accent_primary)
-  root.style.setProperty('--accent-2', branding.accent_secondary)
+  // Intentionally avoid overriding color CSS variables here so
+  // the site's theme remains controlled by `src/index.css`.
+  // Logo and other branding fields are handled in components.
 }
 
 export const getBranding = async () => {
