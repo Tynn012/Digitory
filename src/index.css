@@ -216,9 +216,9 @@ p {
 }
 
 .brand-logo {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
   object-fit: cover;
 }
 
@@ -1079,6 +1079,12 @@ p {
     text-overflow: ellipsis;
     white-space: nowrap;
     max-width: 60%;
+  }
+
+  .brand-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
   }
 
   .brand-badge {

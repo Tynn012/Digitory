@@ -40,13 +40,17 @@ export const saveBranding = async (branding) => {
   const payload = normalizeBranding(branding)
 
   if (isSupabaseConfigured && supabase) {
-    const { data, error } = await supabase
-      .from('branding')
-      .insert([{ ...payload }])
-      .select()
-      .single()
-    if (error) throw error
-    return normalizeBranding(data)
+    try {
+      const { data, error } = await supabase
+        .from('branding')
+        .upsert([{ ...payload }])
+        .select()
+        .single()
+      if (error) throw error
+      return normalizeBranding(data)
+    } catch (err) {
+      throw err
+    }
   }
 
   setStoredValue(STORAGE_KEY, payload)

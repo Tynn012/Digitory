@@ -17,8 +17,14 @@ const AdminBranding = () => {
   const handleSubmit = async (event) => {
     event.preventDefault()
     setSaving(true)
-    await saveBranding(draft)
-    setSaving(false)
+    try {
+      await saveBranding(draft)
+    } catch (err) {
+      console.error('Failed saving branding', err)
+      alert('Failed saving branding: ' + (err.message || JSON.stringify(err)))
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
