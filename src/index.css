@@ -204,26 +204,28 @@ p {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 0;
+  padding: 14px 0;
   gap: 16px;
 }
 
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   font-weight: 700;
 }
 
 .brand-logo {
   border-radius: 0px;
-  width: 213px;
-  height: 67px;
+  /* Reduced ~15% from 213x67 */
+  width: 181px;
+  height: 57px;
   object-fit: cover;
 }
 
 .brand-text {
-  font-size: 20px;
+  font-size: 18px;
+  font-weight: 600;
 }
 
 .brand-badge {
