@@ -712,7 +712,6 @@ p {
   display: grid;
   grid-template-columns: 260px 1fr;
   min-height: 100dvh;
-  align-items: stretch;
 }
 
 .admin-sidebar {
@@ -722,8 +721,10 @@ p {
   gap: 24px;
   background: #fff;
   width: 260px;
-  position: sticky;
-  top: 0;
+  position: fixed;
+  inset: 0 auto 0 0;
+  overflow-y: auto;
+  z-index: 20;
   min-height: 100dvh;
 }
 
@@ -788,6 +789,7 @@ p {
   gap: 24px;
   min-width: 0;
   min-height: 100dvh;
+  grid-column: 2;
 }
 
 .admin-top {
@@ -966,8 +968,14 @@ p {
     border-right: none;
     border-bottom: 1px solid var(--border);
     position: relative;
+    inset: auto;
     width: 100%;
+    overflow: visible;
     min-height: auto;
+  }
+
+  .admin-content {
+    grid-column: auto;
   }
 
   .order-row {
