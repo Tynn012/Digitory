@@ -3,9 +3,11 @@ export const defaultBranding = {
   hero_title: 'Premium digital tools for modern planning.',
   hero_subtitle:
     'Shop curated budget templates, productivity sheets, finance trackers, and study planners designed for clarity, speed, and calm.',
-  logo_url: '',
-  accent_primary: '#1bb3a8',
-  accent_secondary: '#ff8a5b',
+  // Use the project root absolute path for the logo. Move the file to /public if needed for deployment.
+  logo_url: '/Digitory.png',
+  // Palette extracted from Digitory.png
+  accent_primary: '#18cbf2',
+  accent_secondary: '#625fd2',
 }
 
 export const paymentDetails = {
