@@ -4,16 +4,16 @@ import { useAuth } from '../lib/auth'
 
 const AdminLogin = () => {
   const navigate = useNavigate()
-  const { signIn, configMissing, session } = useAuth()
+  const { signIn, configMissing, session, isAdmin, adminLoading } = useAuth()
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (session) {
+    if (session && isAdmin) {
       navigate('/admin/dashboard')
     }
-  }, [session, navigate])
+  }, [session, isAdmin, navigate])
 
   const handleChange = (field) => (event) => {
     setForm((prev) => ({ ...prev, [field]: event.target.value }))
@@ -44,6 +44,18 @@ const AdminLogin = () => {
             Add Supabase credentials in your .env file to enable secure admin
             authentication.
           </p>
+        </div>
+      </div>
+    )
+  }
+
+  if (session && !adminLoading && !isAdmin) {
+    return (
+      <div className="page container">
+        <div className="notice-card">
+          <h2>Admin access required</h2>
+          <p>Your account is signed in but does not have admin privileges.</p>
+          <p className="muted">Use an admin account or ask to be added to admin_users.</p>
         </div>
       </div>
     )
