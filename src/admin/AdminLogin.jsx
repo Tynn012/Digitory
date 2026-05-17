@@ -31,8 +31,8 @@ const AdminLogin = () => {
       return
     }
 
+    // Wait for admin role check effect to complete before redirecting.
     setLoading(false)
-    navigate('/admin/dashboard')
   }
 
   if (configMissing) {

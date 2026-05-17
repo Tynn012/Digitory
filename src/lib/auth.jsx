@@ -27,13 +27,16 @@ export const AuthProvider = ({ children }) => {
     }
 
     supabase.auth.getSession().then(({ data }) => {
-      setSession(data?.session ?? null)
+      const nextSession = data?.session ?? null
+      setSession(nextSession)
+      setAdminLoading(Boolean(nextSession))
       setLoading(false)
     })
 
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, updatedSession) => {
         setSession(updatedSession)
+        setAdminLoading(Boolean(updatedSession))
       },
     )
 
