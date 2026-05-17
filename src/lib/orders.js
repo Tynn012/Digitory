@@ -100,12 +100,17 @@ export const createOrder = async (payload) => {
 
 export const fetchOrders = async () => {
   if (isSupabaseConfigured && supabase) {
-    const { data, error } = await supabase
-      .from('orders')
-      .select('*')
-      .order('created_at', { ascending: false })
-    if (error) throw error
-    return data || []
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      return data || []
+    } catch (err) {
+      // If Supabase fails, fall back to local seeded orders for development
+      return ensureLocalOrders()
+    }
   }
 
   return ensureLocalOrders()
