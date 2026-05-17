@@ -8,26 +8,24 @@ export const sendReceiptEmail = async ({
   amount,
   downloadToken,
 }) => {
-  if (!supabase) {
-    throw new Error('Supabase is not configured.')
+  if (!supabase) throw new Error('Supabase is not configured.')
+
+  // Get the current user token
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+  if (sessionError) throw sessionError
+  const accessToken = sessionData?.session?.access_token
+
+  if (!accessToken) {
+    throw new Error('User not logged in: cannot invoke authenticated Edge Function without a JWT.')
   }
 
   const { data, error } = await supabase.functions.invoke('send-emails-resend', {
-    body: { 
-      orderId 
+    body: { orderId },
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
     },
   })
 
-  if (error) {
-    const rawMessage = (error.message || '').toLowerCase()
-    if (rawMessage.includes('failed to send a request to the edge function')) {
-      throw new Error(
-        'Edge function `send-emails-resend` is not reachable. Deploy it in Supabase and set RESEND_API_KEY, FROM_EMAIL, and SITE_URL secrets.',
-      )
-    }
-    throw error
-  }
+  if (error) throw error
   return data
 }
-
-
