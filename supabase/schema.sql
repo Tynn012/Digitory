@@ -237,3 +237,43 @@ create policy "Branding is editable by admins"
 create policy "Admin users can view themselves"
   on admin_users for select
   using (user_id = auth.uid());
+
+-- Seed sample orders for local/dev environments when orders table is empty
+insert into orders (
+  product_slug,
+  product_title,
+  amount,
+  customer_name,
+  buyer_email,
+  status,
+  paid_at,
+  download_unlocked,
+  download_token,
+  payment_method,
+  created_at,
+  updated_at
+)
+select *
+from (
+  values
+    ('budget-glow-sheet','Budget Glow Sheet',249,'Alice Rivera','alice@example.com','paid', now() - interval '2 days', true, 'dl-ord-1','manual_gcash', now() - interval '2 days', now() - interval '2 days'),
+    ('weekly-focus-planner','Weekly Focus Planner',199,'Ben Torres','ben@example.com','paid', now() - interval '5 days', true, 'dl-ord-2','manual_gcash', now() - interval '5 days', now() - interval '5 days'),
+    ('monthly-cashflow-dashboard','Monthly Cashflow Dashboard',349,'Clara Sung','clara@example.com','paid', now() - interval '8 days', true, 'dl-ord-3','manual_gcash', now() - interval '8 days', now() - interval '8 days'),
+    ('debt-snowball-tracker','Debt Snowball Tracker',299,'Diego Mar','diego@example.com','pending', null, false, 'dl-ord-4','manual_gcash', now() - interval '12 days', now() - interval '12 days'),
+    ('client-invoice-pack','Client Invoice Pack',279,'Eve Nolan','eve@example.com','paid', now() - interval '20 days', true, 'dl-ord-5','manual_gcash', now() - interval '20 days', now() - interval '20 days')
+) as s(
+  product_slug,
+  product_title,
+  amount,
+  customer_name,
+  buyer_email,
+  status,
+  paid_at,
+  download_unlocked,
+  download_token,
+  payment_method,
+  created_at,
+  updated_at
+)
+where not exists (select 1 from orders);
+
