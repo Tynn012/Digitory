@@ -22,6 +22,7 @@ const AdminSidebar = () => {
         <NavLink to="/admin/dashboard">Overview</NavLink>
         <NavLink to="/admin/products">Products</NavLink>
         <NavLink to="/admin/orders">Orders</NavLink>
+        <NavLink to="/admin/analytics">Analytics</NavLink>
         <NavLink to="/admin/branding">Branding</NavLink>
       </nav>
       <button

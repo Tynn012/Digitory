@@ -14,6 +14,7 @@ import AdminDashboard from './admin/AdminDashboard'
 import AdminProducts from './admin/AdminProducts'
 import AdminOrders from './admin/AdminOrders'
 import AdminBranding from './admin/AdminBranding'
+import AdminAnalytics from './admin/AdminAnalytics'
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
           <Route path="products" element={<AdminProducts />} />
           <Route path="orders" element={<AdminOrders />} />
           <Route path="branding" element={<AdminBranding />} />
+          <Route path="analytics" element={<AdminAnalytics />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
