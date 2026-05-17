@@ -12,7 +12,7 @@ export const sendReceiptEmail = async ({
     throw new Error('Supabase is not configured.')
   }
 
-  const { data, error } = await supabase.functions.invoke('send-receipt', {
+  const { data, error } = await supabase.functions.invoke('send-emails-resend', {
     body: { 
       orderId 
     },
@@ -22,7 +22,7 @@ export const sendReceiptEmail = async ({
     const rawMessage = (error.message || '').toLowerCase()
     if (rawMessage.includes('failed to send a request to the edge function')) {
       throw new Error(
-        'Edge function `send-receipt` is not reachable. Deploy it in Supabase and set RESEND_API_KEY, FROM_EMAIL, and SITE_URL secrets.',
+        'Edge function `send-emails-resend` is not reachable. Deploy it in Supabase and set RESEND_API_KEY, FROM_EMAIL, and SITE_URL secrets.',
       )
     }
     throw error
