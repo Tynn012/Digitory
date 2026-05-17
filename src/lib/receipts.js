@@ -13,13 +13,8 @@ export const sendReceiptEmail = async ({
   }
 
   const { data, error } = await supabase.functions.invoke('send-receipt', {
-    body: {
-      orderId,
-      email,
-      customerName,
-      productTitle,
-      amount,
-      downloadToken,
+    body: { 
+      orderId 
     },
   })
 
@@ -34,3 +29,5 @@ export const sendReceiptEmail = async ({
   }
   return data
 }
+
+
