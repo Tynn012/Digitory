@@ -23,6 +23,14 @@ export const sendReceiptEmail = async ({
     },
   })
 
-  if (error) throw error
+  if (error) {
+    const rawMessage = (error.message || '').toLowerCase()
+    if (rawMessage.includes('failed to send a request to the edge function')) {
+      throw new Error(
+        'Edge function `send-receipt` is not reachable. Deploy it in Supabase and set RESEND_API_KEY, FROM_EMAIL, and SITE_URL secrets.',
+      )
+    }
+    throw error
+  }
   return data
 }
