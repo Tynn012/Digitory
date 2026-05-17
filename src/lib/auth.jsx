@@ -63,6 +63,18 @@ export const AuthProvider = ({ children }) => {
       }
     }
 
+    // Avoid admin role checks with expired/invalid sessions.
+    const expiresAtMs = (session.expires_at || 0) * 1000
+    if (expiresAtMs && expiresAtMs <= Date.now()) {
+      setIsAdmin(false)
+      setAdminError('Session expired. Please sign in again.')
+      setAdminLoading(false)
+      supabase.auth.signOut()
+      return () => {
+        active = false
+      }
+    }
+
     setAdminLoading(true)
     supabase
       .from('admin_users')
@@ -72,6 +84,12 @@ export const AuthProvider = ({ children }) => {
       .then(({ data, error }) => {
         if (!active) return
         if (error) {
+          if (error.status === 401 || error.code === '401' || error.code === 'PGRST301') {
+            setAdminError('Session expired. Please sign in again.')
+            setIsAdmin(false)
+            supabase.auth.signOut()
+            return
+          }
           setAdminError(
             'Admin role check failed. Ensure schema.sql has been applied.',
           )
