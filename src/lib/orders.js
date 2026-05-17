@@ -1,5 +1,6 @@
 import { supabase, isSupabaseConfigured } from './supabaseClient'
 import { getStoredValue, setStoredValue } from './storage'
+import { seedOrders } from '../data/sampleOrders'
 
 const STORAGE_KEY = 'digitory-orders'
 
@@ -12,9 +13,9 @@ const createDownloadToken = () => {
 
 const ensureLocalOrders = () => {
   const stored = getStoredValue(STORAGE_KEY, null)
-  if (!Array.isArray(stored)) {
-    setStoredValue(STORAGE_KEY, [])
-    return []
+  if (!Array.isArray(stored) || stored.length === 0) {
+    setStoredValue(STORAGE_KEY, seedOrders)
+    return seedOrders
   }
   return stored
 }
