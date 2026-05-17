@@ -2,7 +2,6 @@ import { useEffect, useState, useMemo } from 'react'
 import StatCard from '../components/StatCard'
 import EmptyState from '../components/EmptyState'
 import { fetchOrders } from '../lib/orders'
-import { fetchProducts } from '../lib/products'
 import { formatPrice } from '../lib/format'
 import {
   LineChart,
@@ -19,15 +18,13 @@ import {
 const AdminAnalytics = () => {
   const [loading, setLoading] = useState(true)
   const [orders, setOrders] = useState([])
-  const [products, setProducts] = useState([])
 
   useEffect(() => {
     let mounted = true
-    Promise.all([fetchOrders(), fetchProducts()])
-      .then(([o, p]) => {
+    fetchOrders()
+      .then((o) => {
         if (!mounted) return
         setOrders(o || [])
-        setProducts(p || [])
       })
       .catch(() => {})
       .finally(() => mounted && setLoading(false))
@@ -36,23 +33,6 @@ const AdminAnalytics = () => {
       mounted = false
     }
   }, [])
-
-  if (loading) {
-    return (
-      <div className="loader-wrapper">
-        <div className="loader" />
-        <p>Loading analytics...</p>
-      </div>
-    )
-  }
-
-  if (!orders.length) {
-    return (
-      <div className="section container">
-        <EmptyState title="No sales data" description="No orders yet to display analytics." />
-      </div>
-    )
-  }
 
   const totalOrders = orders.length
   const paidOrders = orders.filter((o) => o.status === 'paid')
@@ -105,6 +85,26 @@ const AdminAnalytics = () => {
     })
     return Object.values(m).sort((a, b) => b.revenue - a.revenue).slice(0, 8)
   }, [orders])
+
+  if (loading) {
+    return (
+      <div className="loader-wrapper">
+        <div className="loader" />
+        <p>Loading analytics...</p>
+      </div>
+    )
+  }
+
+  if (!orders.length) {
+    return (
+      <div className="section container">
+        <EmptyState
+          title="No sales data"
+          description="No orders yet to display analytics. Once there are paid or pending orders, charts and reports will appear here."
+        />
+      </div>
+    )
+  }
 
   return (
     <section className="admin-grid">

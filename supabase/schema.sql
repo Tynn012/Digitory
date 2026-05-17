@@ -15,6 +15,7 @@ create table if not exists products (
   description text,
   price numeric(10,2),
   category text,
+  archived boolean default false,
   featured boolean default false,
   thumbnail text,
   images jsonb default '[]'::jsonb,
@@ -59,6 +60,7 @@ create table if not exists branding (
 );
 
 alter table orders add column if not exists buyer_email text;
+alter table products add column if not exists archived boolean default false;
 alter table orders add column if not exists download_token text;
 alter table orders add column if not exists download_url text;
 alter table orders add column if not exists payment_method text default 'manual_gcash';

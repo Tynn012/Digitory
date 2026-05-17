@@ -16,27 +16,38 @@ const ensureLocalProducts = () => {
 const normalizeProduct = (product) => ({
   ...product,
   price: Number(product?.price ?? 0),
+  archived: Boolean(product?.archived),
   images: Array.isArray(product?.images) ? product.images : [],
   tags: Array.isArray(product?.tags) ? product.tags : [],
 })
 
-export const fetchProducts = async () => {
+export const fetchProducts = async ({ includeArchived = false } = {}) => {
   if (isSupabaseConfigured && supabase) {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('products')
         .select('*')
         .order('featured', { ascending: false })
         .order('created_at', { ascending: false })
 
+      if (!includeArchived) {
+        query = query.eq('archived', false)
+      }
+
+      const { data, error } = await query
+
       if (error) throw error
       return (data || []).map(normalizeProduct)
     } catch {
-      return ensureLocalProducts().map(normalizeProduct)
+      return ensureLocalProducts()
+        .map(normalizeProduct)
+        .filter((product) => includeArchived || !product.archived)
     }
   }
 
-  return ensureLocalProducts().map(normalizeProduct)
+  return ensureLocalProducts()
+    .map(normalizeProduct)
+    .filter((product) => includeArchived || !product.archived)
 }
 
 export const fetchProductBySlug = async (slug) => {
@@ -46,18 +57,19 @@ export const fetchProductBySlug = async (slug) => {
         .from('products')
         .select('*')
         .eq('slug', slug)
+        .eq('archived', false)
         .maybeSingle()
 
       if (error) throw error
       return data ? normalizeProduct(data) : null
     } catch {
       const local = ensureLocalProducts()
-      return local.find((product) => product.slug === slug) || null
+      return local.find((product) => product.slug === slug && !product.archived) || null
     }
   }
 
   const local = ensureLocalProducts()
-  return local.find((product) => product.slug === slug) || null
+  return local.find((product) => product.slug === slug && !product.archived) || null
 }
 
 export const saveProduct = async (product) => {
@@ -65,6 +77,7 @@ export const saveProduct = async (product) => {
     ...product,
     title: product.title?.trim() || '',
     slug: product.slug?.trim() || '',
+    archived: Boolean(product.archived),
     category: product.category?.trim() || '',
     description: product.description?.trim() || '',
     thumbnail: product.thumbnail?.trim() || '',
@@ -120,14 +133,44 @@ export const saveProduct = async (product) => {
 }
 
 export const deleteProduct = async (id) => {
+  // Soft delete: archive product instead of removing it.
   if (isSupabaseConfigured && supabase) {
-    const { error } = await supabase.from('products').delete().eq('id', id)
+    const { error } = await supabase
+      .from('products')
+      .update({ archived: true, updated_at: new Date().toISOString() })
+      .eq('id', id)
     if (error) throw error
     return true
   }
 
   const items = ensureLocalProducts()
-  const next = items.filter((item) => item.id !== id)
+  const next = items.map((item) =>
+    item.id === id
+      ? { ...item, archived: true, updated_at: new Date().toISOString() }
+      : item,
+  )
   setStoredValue(STORAGE_KEY, next)
   return true
+}
+
+export const setProductArchived = async (id, archived) => {
+  if (isSupabaseConfigured && supabase) {
+    const { data, error } = await supabase
+      .from('products')
+      .update({ archived: Boolean(archived), updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw error
+    return normalizeProduct(data)
+  }
+
+  const items = ensureLocalProducts()
+  const now = new Date().toISOString()
+  const next = items.map((item) =>
+    item.id === id ? { ...item, archived: Boolean(archived), updated_at: now } : item,
+  )
+  setStoredValue(STORAGE_KEY, next)
+  return normalizeProduct(next.find((item) => item.id === id) || {})
 }

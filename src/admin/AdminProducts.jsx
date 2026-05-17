@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { categories } from '../data/products'
-import { fetchProducts, saveProduct, deleteProduct } from '../lib/products'
+import { fetchProducts, saveProduct, deleteProduct, setProductArchived } from '../lib/products'
 import { slugify } from '../lib/format'
 import EmptyState from '../components/EmptyState'
 
@@ -25,7 +25,7 @@ const AdminProducts = () => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchProducts()
+    fetchProducts({ includeArchived: true })
       .then((data) => {
         setProducts(data)
         setLoading(false)
@@ -110,7 +110,18 @@ const AdminProducts = () => {
 
   const handleDelete = async (id) => {
     await deleteProduct(id)
-    setProducts((prev) => prev.filter((item) => item.id !== id))
+    setProducts((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, archived: true } : item,
+      ),
+    )
+  }
+
+  const handleToggleArchive = async (product) => {
+    const updated = await setProductArchived(product.id, !product.archived)
+    setProducts((prev) =>
+      prev.map((item) => (item.id === product.id ? updated : item)),
+    )
   }
 
   const sortedProducts = useMemo(
@@ -232,7 +243,10 @@ const AdminProducts = () => {
             {sortedProducts.map((product) => (
               <div key={product.id} className="product-admin-item">
                 <div>
-                  <h4>{product.title}</h4>
+                  <h4>
+                    {product.title}
+                    {product.archived ? ' (Archived)' : ''}
+                  </h4>
                   <p>{product.category}</p>
                 </div>
                 <div className="product-admin-actions">
@@ -247,8 +261,16 @@ const AdminProducts = () => {
                     type="button"
                     className="button ghost danger"
                     onClick={() => handleDelete(product.id)}
+                    disabled={product.archived}
                   >
-                    Delete
+                    Archive
+                  </button>
+                  <button
+                    type="button"
+                    className="button ghost"
+                    onClick={() => handleToggleArchive(product)}
+                  >
+                    {product.archived ? 'Unarchive' : 'Set archived'}
                   </button>
                 </div>
               </div>
