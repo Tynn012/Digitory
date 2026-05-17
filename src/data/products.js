@@ -206,7 +206,7 @@ export const seedProducts = [
       createPlaceholderImage('Highlights Board', 'mint'),
     ],
     tags: ['notion', 'reading', 'knowledge'],
-    digital_file_url: '',
+    digital_file_url: 'https://www.notion.so/templates/reading-list',
     metadata: { format: 'notion', pages: 1 },
   },
 ]

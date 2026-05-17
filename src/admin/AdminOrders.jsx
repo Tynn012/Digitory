@@ -6,6 +6,7 @@ import {
   deleteOrder,
   createDownloadToken,
 } from '../lib/orders'
+import { fetchProductBySlug } from '../lib/products'
 import { formatPrice } from '../lib/format'
 import EmptyState from '../components/EmptyState'
 import { sendReceiptEmail } from '../lib/receipts'
@@ -52,6 +53,33 @@ const AdminOrders = () => {
     return format(new Date(value), 'MMM d, yyyy')
   }
 
+  const ensureDownloadLink = async (order) => {
+    if (order.download_url) {
+      return order
+    }
+
+    if (!order.product_slug) {
+      return order
+    }
+
+    try {
+      const product = await fetchProductBySlug(order.product_slug)
+      const fallbackUrl = product?.digital_file_url?.trim()
+
+      if (!fallbackUrl) {
+        return order
+      }
+
+      const updated = await updateOrder(order.id, { download_url: fallbackUrl })
+      setOrders((prev) =>
+        prev.map((item) => (item.id === order.id ? updated : item)),
+      )
+      return updated
+    } catch {
+      return order
+    }
+  }
+
   const handleMarkPaid = async (order) => {
     setNotice('')
     setError('')
@@ -73,7 +101,9 @@ const AdminOrders = () => {
         return
       }
 
-      if (!updated.download_url) {
+      const orderWithLink = await ensureDownloadLink(updated)
+
+      if (!orderWithLink.download_url) {
         setNotice(
           'Payment marked as paid. Add a download link before sending receipt.',
         )
@@ -81,12 +111,12 @@ const AdminOrders = () => {
       }
 
       await sendReceiptEmail({
-        orderId: updated.id,
-        email: updated.buyer_email,
-        customerName: updated.customer_name,
-        productTitle: updated.product_title,
-        amount: updated.amount,
-        downloadToken: updated.download_token,
+        orderId: orderWithLink.id,
+        email: orderWithLink.buyer_email,
+        customerName: orderWithLink.customer_name,
+        productTitle: orderWithLink.product_title,
+        amount: orderWithLink.amount,
+        downloadToken: orderWithLink.download_token,
       })
 
       const withReceipt = await updateOrder(order.id, {
@@ -115,11 +145,6 @@ const AdminOrders = () => {
       return
     }
 
-    if (!order.download_url) {
-      setError('Missing download link on the order.')
-      return
-    }
-
     const downloadToken = order.download_token || createDownloadToken()
     let updatedOrder = order
 
@@ -131,6 +156,12 @@ const AdminOrders = () => {
         setOrders((prev) =>
           prev.map((item) => (item.id === order.id ? updatedOrder : item)),
         )
+      }
+
+      updatedOrder = await ensureDownloadLink(updatedOrder)
+      if (!updatedOrder.download_url) {
+        setError('Missing download link on the order and product.')
+        return
       }
 
       await sendReceiptEmail({
