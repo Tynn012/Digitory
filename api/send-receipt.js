@@ -2,6 +2,7 @@ import nodemailer from 'nodemailer'
 import { createClient } from '@supabase/supabase-js'
 
 const env = globalThis.process?.env ?? {}
+const isProduction = env.NODE_ENV === 'production'
 
 const isEmailConfigured = () =>
   Boolean(env.SMTP_HOST) && Boolean(env.SMTP_USER) && Boolean(env.SMTP_PASS)
@@ -144,7 +145,7 @@ export default async function handler(req, res) {
   const fromEmail = env.MAIL_FROM || env.SMTP_USER || env.MAIL_TO || toEmail
 
   if (!emailConfigured) {
-    if (env.NODE_ENV !== 'production') {
+    if (!isProduction) {
       return res.status(200).json({ ok: true, preview: true })
     }
 
@@ -165,6 +166,15 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ ok: true, downloadLink })
   } catch (error) {
+    if (!isProduction) {
+      return res.status(500).json({
+        error: 'Email delivery failed.',
+        detail: error?.message || String(error),
+        code: error?.code || null,
+        response: error?.response || null,
+      })
+    }
+
     return res.status(500).json({ error: 'Email delivery failed.' })
   }
 }
