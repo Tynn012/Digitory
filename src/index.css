@@ -710,6 +710,133 @@ p {
   box-shadow: var(--shadow);
 }
 
+.admin-auth-shell {
+  grid-template-columns: 1fr;
+}
+
+.admin-auth {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  padding: 72px 24px;
+}
+
+.admin-auth-card {
+  width: min(520px, 100%);
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  padding: 32px;
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 20px;
+  backdrop-filter: blur(12px);
+}
+
+.admin-auth-header {
+  display: grid;
+  gap: 10px;
+  text-align: center;
+}
+
+.admin-auth-header h1 {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.2;
+}
+
+.admin-auth-subtitle {
+  margin: 0;
+}
+
+.admin-auth-form {
+  display: grid;
+  gap: 16px;
+}
+
+.admin-auth-form .button {
+  width: 100%;
+  justify-content: center;
+}
+
+.admin-auth-form .input-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.admin-auth-form .input-row input {
+  flex: 1;
+}
+
+.admin-auth-form .input-row .button {
+  width: auto;
+  padding: 10px 14px;
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+.mfa-setup-card {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  border: 1px dashed rgba(27, 179, 168, 0.3);
+  background: rgba(27, 179, 168, 0.04);
+}
+
+.mfa-setup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  align-items: center;
+}
+
+.mfa-qr-frame {
+  display: grid;
+  place-items: center;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #fff;
+}
+
+.mfa-qr-frame img {
+  width: 180px;
+  height: auto;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.mfa-secret-card {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.mfa-secret-card span {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.mfa-secret-card strong {
+  font-family: 'Courier New', monospace;
+  color: var(--ink);
+  word-break: break-all;
+  background: rgba(27, 179, 168, 0.06);
+  border-radius: 8px;
+  padding: 8px 10px;
+  border: 1px solid rgba(27, 179, 168, 0.18);
+}
+
+.mfa-secret-card p {
+  margin: 0;
+  font-size: 12px;
+  word-break: break-all;
+}
+
 .admin-shell {
   display: grid;
   grid-template-columns: 260px 1fr;

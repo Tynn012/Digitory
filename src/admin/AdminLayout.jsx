@@ -27,6 +27,18 @@ const AdminLayout = () => {
   const [mfaUri, setMfaUri] = useState('')
   const allowlist = useMemo(() => getAdminAllowlist(), [])
   const hasSupabase = isSupabaseConfigured && Boolean(supabase)
+  const authTitle =
+    authStep === 'enroll'
+      ? 'Set up authenticator'
+      : authStep === 'verify'
+        ? 'Verify your identity'
+        : 'Secure admin access'
+  const authSubtitle =
+    authStep === 'enroll'
+      ? 'Scan the QR code, then enter the 6-digit code to finish setup.'
+      : authStep === 'verify'
+        ? 'Enter the 6-digit code from your authenticator app.'
+        : `Enter your credentials to manage ${brandName}.`
 
   const resetMfaState = () => {
     setMfaReady(false)
@@ -272,14 +284,17 @@ const AdminLayout = () => {
 
   if (isLoading) {
     return (
-      <div className="admin-shell">
-        <section className="admin-content">
-          <div className="admin-top">
-            <h1>Loading admin</h1>
-            <p>Checking your secure session.</p>
-          </div>
-          <div className="loader-wrapper">
-            <div className="loader" />
+      <div className="admin-shell admin-auth-shell">
+        <section className="admin-auth">
+          <div className="admin-auth-card admin-auth-status">
+            <header className="admin-auth-header">
+              <span className="eyebrow">Admin portal</span>
+              <h1>Loading admin</h1>
+              <p>Checking your secure session.</p>
+            </header>
+            <div className="loader-wrapper">
+              <div className="loader" />
+            </div>
           </div>
         </section>
       </div>
@@ -288,15 +303,18 @@ const AdminLayout = () => {
 
   if (!hasSupabase) {
     return (
-      <div className="admin-shell">
-        <section className="admin-content">
-          <div className="admin-top">
-            <h1>Supabase setup required</h1>
-            <p>
-              Add <strong>VITE_SUPABASE_URL</strong> and
-              <strong> VITE_SUPABASE_ANON_KEY</strong> to your environment to
-              enable admin sign-in.
-            </p>
+      <div className="admin-shell admin-auth-shell">
+        <section className="admin-auth">
+          <div className="admin-auth-card admin-auth-status">
+            <header className="admin-auth-header">
+              <span className="eyebrow">Admin portal</span>
+              <h1>Supabase setup required</h1>
+              <p>
+                Add <strong>VITE_SUPABASE_URL</strong> and
+                <strong> VITE_SUPABASE_ANON_KEY</strong> to your environment to
+                enable admin sign-in.
+              </p>
+            </header>
           </div>
         </section>
       </div>
@@ -305,136 +323,125 @@ const AdminLayout = () => {
 
   if (!session || !isAllowed || !mfaReady) {
     return (
-      <div className="admin-shell">
-        <section className="admin-content">
-          <div className="login-page">
-            <div className="auth-card">
-              <h2>
-                {authStep === 'enroll'
-                  ? 'Set up authenticator'
-                  : authStep === 'verify'
-                    ? 'Verify your identity'
-                    : 'Secure admin access'}
-              </h2>
-              <p>
-                {authStep === 'enroll'
-                  ? 'Scan the QR code, then enter the 6-digit code to finish setup.'
-                  : authStep === 'verify'
-                    ? 'Enter the 6-digit code from your authenticator app.'
-                    : `Enter your credentials to manage ${brandName}.`}
-              </p>
+      <div className="admin-shell admin-auth-shell">
+        <section className="admin-auth">
+          <div className="admin-auth-card">
+            <header className="admin-auth-header">
+              <span className="eyebrow">Admin portal</span>
+              <h1>{authTitle}</h1>
+              <p className="admin-auth-subtitle">{authSubtitle}</p>
+            </header>
 
-              {authStep === 'enroll' && (
-                <section className="mfa-setup-card">
-                  <div className="mfa-setup-grid">
-                    <div className="mfa-qr-frame">
-                      {mfaQrCode ? (
-                        <img src={mfaQrCode} alt="Authenticator QR code" />
-                      ) : (
-                        <p>Loading QR code...</p>
-                      )}
-                    </div>
-                    <div className="mfa-secret-card">
-                      <span>Manual entry key</span>
-                      <strong>{mfaSecret || 'Waiting for secret...'}</strong>
-                      {mfaUri && <p>{mfaUri}</p>}
-                    </div>
+            {authStep === 'enroll' && (
+              <section className="mfa-setup-card">
+                <div className="mfa-setup-grid">
+                  <div className="mfa-qr-frame">
+                    {mfaQrCode ? (
+                      <img src={mfaQrCode} alt="Authenticator QR code" />
+                    ) : (
+                      <p>Loading QR code...</p>
+                    )}
                   </div>
-                </section>
+                  <div className="mfa-secret-card">
+                    <span>Manual entry key</span>
+                    <strong>{mfaSecret || 'Waiting for secret...'}</strong>
+                    {mfaUri && <p>{mfaUri}</p>}
+                  </div>
+                </div>
+              </section>
+            )}
+
+            <form onSubmit={handleLogin} className="form-grid admin-auth-form">
+              <label className="form-field">
+                Email
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(event) => {
+                    setEmail(event.target.value)
+                    setAuthError('')
+                  }}
+                  required
+                  autoComplete="email"
+                  disabled={isSubmitting}
+                />
+              </label>
+
+              {authStep === 'password' && (
+                <label className="form-field">
+                  Password
+                  <div className="input-row">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(event) => {
+                        setPassword(event.target.value)
+                        setAuthError('')
+                      }}
+                      required
+                      autoComplete="current-password"
+                      disabled={isSubmitting}
+                    />
+                    <button
+                      type="button"
+                      className="button ghost"
+                      onClick={() => setShowPassword(!showPassword)}
+                      disabled={isSubmitting}
+                    >
+                      {showPassword ? 'Hide' : 'Show'}
+                    </button>
+                  </div>
+                </label>
               )}
 
-              <form onSubmit={handleLogin} className="form-grid">
+              {(authStep === 'enroll' || authStep === 'verify') && (
                 <label className="form-field">
-                  Email
+                  Two-factor code
                   <input
-                    type="email"
-                    value={email}
+                    type="text"
+                    value={mfaCode}
                     onChange={(event) => {
-                      setEmail(event.target.value)
+                      setMfaCode(event.target.value.replace(/\D/g, '').slice(0, 6))
                       setAuthError('')
                     }}
+                    placeholder="000000"
+                    maxLength="6"
+                    autoComplete="off"
                     required
-                    autoComplete="email"
                     disabled={isSubmitting}
                   />
                 </label>
+              )}
 
-                {authStep === 'password' && (
-                  <label className="form-field">
-                    Password
-                    <div className="input-row">
-                      <input
-                        type={showPassword ? 'text' : 'password'}
-                        value={password}
-                        onChange={(event) => {
-                          setPassword(event.target.value)
-                          setAuthError('')
-                        }}
-                        required
-                        autoComplete="current-password"
-                        disabled={isSubmitting}
-                      />
-                      <button
-                        type="button"
-                        className="button ghost"
-                        onClick={() => setShowPassword(!showPassword)}
-                        disabled={isSubmitting}
-                      >
-                        {showPassword ? 'Hide' : 'Show'}
-                      </button>
-                    </div>
-                  </label>
-                )}
+              {authError && <p className="form-error">{authError}</p>}
 
-                {(authStep === 'enroll' || authStep === 'verify') && (
-                  <label className="form-field">
-                    Two-factor code
-                    <input
-                      type="text"
-                      value={mfaCode}
-                      onChange={(event) => {
-                        setMfaCode(event.target.value.replace(/\D/g, '').slice(0, 6))
-                        setAuthError('')
-                      }}
-                      placeholder="000000"
-                      maxLength="6"
-                      autoComplete="off"
-                      required
-                      disabled={isSubmitting}
-                    />
-                  </label>
-                )}
+              <button type="submit" className="button primary" disabled={isSubmitting}>
+                {isSubmitting
+                  ? 'Signing in...'
+                  : authStep === 'enroll'
+                    ? 'Finish setup'
+                    : authStep === 'verify'
+                      ? 'Verify code'
+                      : 'Sign in'}
+              </button>
 
-                {authError && <p className="form-error">{authError}</p>}
-
-                <button type="submit" className="button primary" disabled={isSubmitting}>
-                  {isSubmitting
-                    ? 'Signing in...'
-                    : authStep === 'enroll'
-                      ? 'Finish setup'
-                      : authStep === 'verify'
-                        ? 'Verify code'
-                        : 'Sign in'}
+              {(authStep === 'enroll' || authStep === 'verify') && (
+                <button
+                  type="button"
+                  className="button ghost"
+                  onClick={async () => {
+                    await supabase.auth.signOut()
+                    resetMfaState()
+                    setEmail('')
+                    setPassword('')
+                    setAuthError('')
+                  }}
+                  disabled={isSubmitting}
+                >
+                  Back to login
                 </button>
-
-                {(authStep === 'enroll' || authStep === 'verify') && (
-                  <button
-                    type="button"
-                    className="button ghost"
-                    onClick={async () => {
-                      await supabase.auth.signOut()
-                      resetMfaState()
-                      setEmail('')
-                      setPassword('')
-                      setAuthError('')
-                    }}
-                    disabled={isSubmitting}
-                  >
-                    Back to login
-                  </button>
-                )}
-              </form>
-            </div>
+              )}
+            </form>
           </div>
         </section>
       </div>
