@@ -159,6 +159,7 @@ set public = excluded.public;
 
 -- Storage policies: allow authenticated admin users to insert/update objects in the buckets
 drop policy if exists "Admins can manage product media" on storage.objects;
+drop policy if exists "Authenticated users can manage product media" on storage.objects;
 create policy "Authenticated users can manage product media"
   on storage.objects for all
   to authenticated
@@ -166,6 +167,7 @@ create policy "Authenticated users can manage product media"
   with check (bucket_id = 'product-media');
 
 drop policy if exists "Admins can manage product files" on storage.objects;
+drop policy if exists "Authenticated users can manage product files" on storage.objects;
 create policy "Authenticated users can manage product files"
   on storage.objects for all
   to authenticated
