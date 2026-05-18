@@ -839,8 +839,11 @@ p {
 
 .admin-shell {
   display: grid;
-  grid-template-columns: 260px 1fr;
+  grid-template-columns: 260px minmax(0, 960px);
+  justify-content: center;
+  gap: 32px;
   min-height: 100dvh;
+  padding: 0 24px;
 }
 
 .admin-sidebar {
@@ -850,8 +853,9 @@ p {
   gap: 24px;
   background: #fff;
   width: 260px;
-  position: fixed;
-  inset: 0 auto 0 0;
+  position: sticky;
+  top: 0;
+  align-self: start;
   overflow-y: auto;
   z-index: 20;
   min-height: 100dvh;

@@ -10,6 +10,27 @@ const createDownloadToken = () => {
   return `dl-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
 }
 
+const createOrderId = () => {
+  if (typeof crypto === 'undefined') {
+    return null
+  }
+
+  if (crypto.randomUUID) {
+    return crypto.randomUUID()
+  }
+
+  if (!crypto.getRandomValues) {
+    return null
+  }
+
+  const bytes = crypto.getRandomValues(new Uint8Array(16))
+  bytes[6] = (bytes[6] & 0x0f) | 0x40
+  bytes[8] = (bytes[8] & 0x3f) | 0x80
+  const toHex = (value) => value.toString(16).padStart(2, '0')
+  const hex = Array.from(bytes, toHex).join('')
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
+}
+
 const ensureLocalOrders = () => {
   const stored = getStoredValue(STORAGE_KEY, null)
   if (!Array.isArray(stored)) {
@@ -19,24 +40,32 @@ const ensureLocalOrders = () => {
   return stored
 }
 
-const createOrderPayload = (payload) => ({
-  product_id: payload.product_id || null,
-  product_slug: payload.product_slug || '',
-  product_title: payload.product_title || '',
-  amount: Number(payload.amount || 0),
-  customer_name: payload.customer_name || '',
-  buyer_email: payload.buyer_email ? payload.buyer_email.trim().toLowerCase() : '',
-  gcash_reference: payload.gcash_reference || '',
-  proof_url: payload.proof_url || null,
-  status: payload.status || 'pending',
-  paid_at: payload.paid_at || null,
-  download_unlocked: Boolean(payload.download_unlocked),
-  download_token: payload.download_token || createDownloadToken(),
-  download_url: payload.download_url ? payload.download_url.trim() : '',
-  payment_method: payload.payment_method || 'manual_gcash',
-  receipt_sent_at: payload.receipt_sent_at || null,
-  metadata: payload.metadata || {},
-})
+const createOrderPayload = (payload) => {
+  const order = {
+    product_id: payload.product_id || null,
+    product_slug: payload.product_slug || '',
+    product_title: payload.product_title || '',
+    amount: Number(payload.amount || 0),
+    customer_name: payload.customer_name || '',
+    buyer_email: payload.buyer_email ? payload.buyer_email.trim().toLowerCase() : '',
+    gcash_reference: payload.gcash_reference || '',
+    proof_url: payload.proof_url || null,
+    status: payload.status || 'pending',
+    paid_at: payload.paid_at || null,
+    download_unlocked: Boolean(payload.download_unlocked),
+    download_token: payload.download_token || createDownloadToken(),
+    download_url: payload.download_url ? payload.download_url.trim() : '',
+    payment_method: payload.payment_method || 'manual_gcash',
+    receipt_sent_at: payload.receipt_sent_at || null,
+    metadata: payload.metadata || {},
+  }
+
+  if (payload.id) {
+    order.id = payload.id
+  }
+
+  return order
+}
 
 const uploadProof = async (file, orderId) => {
   if (!supabase) return null
@@ -52,9 +81,23 @@ const uploadProof = async (file, orderId) => {
 }
 
 export const createOrder = async (payload) => {
-  const orderPayload = createOrderPayload(payload)
-
   if (isSupabaseConfigured && supabase) {
+    let proofUrl = payload.proof_url || null
+    let orderId = null
+
+    if (payload.proof_file) {
+      orderId = createOrderId()
+      if (orderId) {
+        proofUrl = await uploadProof(payload.proof_file, orderId)
+      }
+    }
+
+    const orderPayload = createOrderPayload({
+      ...payload,
+      id: orderId || undefined,
+      proof_url: proofUrl,
+    })
+
     const { data, error } = await supabase
       .from('orders')
       .insert([{ ...orderPayload }])
@@ -63,21 +106,26 @@ export const createOrder = async (payload) => {
 
     if (error) throw error
 
-    if (payload.proof_file) {
-      const proofUrl = await uploadProof(payload.proof_file, data.id)
-      if (proofUrl) {
-        const { data: updated } = await supabase
+    if (payload.proof_file && !orderId) {
+      const uploadedProofUrl = await uploadProof(payload.proof_file, data.id)
+      if (uploadedProofUrl) {
+        const { data: updated, error: updateError } = await supabase
           .from('orders')
-          .update({ proof_url: proofUrl })
+          .update({ proof_url: uploadedProofUrl })
           .eq('id', data.id)
           .select()
           .single()
-        return updated || data
+
+        if (!updateError && updated) {
+          return updated
+        }
       }
     }
 
     return data
   }
+
+  const orderPayload = createOrderPayload(payload)
 
   const orders = ensureLocalOrders()
   const now = new Date().toISOString()

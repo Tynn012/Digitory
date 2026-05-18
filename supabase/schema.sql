@@ -106,6 +106,7 @@ create policy "Products are viewable by everyone"
   using (true);
 
 drop policy if exists "Products are editable by admins" on public.products;
+drop policy if exists "Products are editable by authenticated users" on public.products;
 create policy "Products are editable by authenticated users"
   on public.products for all
   using (auth.role() = 'authenticated')
@@ -117,17 +118,20 @@ create policy "Orders can be created by anyone"
   with check (true);
 
 drop policy if exists "Orders are viewable by admins" on public.orders;
+drop policy if exists "Orders are viewable by authenticated users" on public.orders;
 create policy "Orders are viewable by authenticated users"
   on public.orders for select
   using (auth.role() = 'authenticated');
 
 drop policy if exists "Orders are editable by admins" on public.orders;
+drop policy if exists "Orders are editable by authenticated users" on public.orders;
 create policy "Orders are editable by authenticated users"
   on public.orders for update
   using (auth.role() = 'authenticated')
   with check (auth.role() = 'authenticated');
 
 drop policy if exists "Orders are deletable by admins" on public.orders;
+drop policy if exists "Orders are deletable by authenticated users" on public.orders;
 create policy "Orders are deletable by authenticated users"
   on public.orders for delete
   using (auth.role() = 'authenticated');
@@ -138,6 +142,7 @@ create policy "Branding is viewable by everyone"
   using (true);
 
 drop policy if exists "Branding is editable by admins" on public.branding;
+drop policy if exists "Branding is editable by authenticated users" on public.branding;
 create policy "Branding is editable by authenticated users"
   on public.branding for all
   using (auth.role() = 'authenticated')
@@ -147,7 +152,8 @@ create policy "Branding is editable by authenticated users"
 insert into storage.buckets (id, name, public)
 values
   ('product-media', 'product-media', true),
-  ('product-files', 'product-files', true)
+  ('product-files', 'product-files', true),
+  ('order-proofs', 'order-proofs', true)
 on conflict (id) do update
 set public = excluded.public;
 
@@ -165,5 +171,18 @@ create policy "Authenticated users can manage product files"
   to authenticated
   using (bucket_id = 'product-files')
   with check (bucket_id = 'product-files');
+
+drop policy if exists "Public can insert order proofs" on storage.objects;
+create policy "Public can insert order proofs"
+  on storage.objects for insert
+  to anon, authenticated
+  with check (bucket_id = 'order-proofs');
+
+drop policy if exists "Public can update order proofs" on storage.objects;
+create policy "Public can update order proofs"
+  on storage.objects for update
+  to anon, authenticated
+  using (bucket_id = 'order-proofs')
+  with check (bucket_id = 'order-proofs');
 
 
