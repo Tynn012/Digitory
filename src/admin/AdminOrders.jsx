@@ -32,6 +32,15 @@ const AdminOrders = () => {
     try {
       const updated = await updateOrder(id, updates)
       setOrders((prev) => prev.map((item) => (item.id === id ? updated : item)))
+      if (updates.status === 'rejected') {
+        setNotice('Order rejected.')
+        return
+      }
+      if (updates.download_unlocked) {
+        setNotice('Order unlocked.')
+        return
+      }
+      setNotice('Order updated.')
     } catch (err) {
       setError(err.message || 'Unable to update order.')
     }
@@ -43,6 +52,7 @@ const AdminOrders = () => {
     try {
       await deleteOrder(id)
       setOrders((prev) => prev.filter((item) => item.id !== id))
+      setNotice('Order deleted.')
     } catch (err) {
       setError(err.message || 'Unable to delete order.')
     }

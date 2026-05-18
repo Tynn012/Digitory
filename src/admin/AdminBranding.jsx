@@ -5,6 +5,8 @@ const AdminBranding = () => {
   const { branding, saveBranding } = useBranding()
   const [draft, setDraft] = useState(branding)
   const [saving, setSaving] = useState(false)
+  const [notice, setNotice] = useState('')
+  const [error, setError] = useState('')
 
   useEffect(() => {
     setDraft(branding)
@@ -17,11 +19,14 @@ const AdminBranding = () => {
   const handleSubmit = async (event) => {
     event.preventDefault()
     setSaving(true)
+    setNotice('')
+    setError('')
     try {
       await saveBranding(draft)
+      setNotice('Branding updated.')
     } catch (err) {
       console.error('Failed saving branding', err)
-      alert('Failed saving branding: ' + (err.message || JSON.stringify(err)))
+      setError(err.message || 'Unable to save branding.')
     } finally {
       setSaving(false)
     }
@@ -30,6 +35,8 @@ const AdminBranding = () => {
   return (
     <section className="admin-card">
       <h3>Branding</h3>
+      {notice && <div className="success-card">{notice}</div>}
+      {error && <p className="form-error">{error}</p>}
       <form onSubmit={handleSubmit} className="form-grid">
         <label className="form-field">
           Website name

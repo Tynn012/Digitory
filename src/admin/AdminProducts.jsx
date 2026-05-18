@@ -26,6 +26,8 @@ const AdminProducts = () => {
   const [editingId, setEditingId] = useState(null)
   const [slugTouched, setSlugTouched] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [notice, setNotice] = useState('')
+  const [error, setError] = useState('')
 
   useEffect(() => {
     fetchProducts({ includeArchived: true })
@@ -56,6 +58,8 @@ const AdminProducts = () => {
   }
 
   const handleEdit = (product) => {
+    setNotice('Editing product details.')
+    setError('')
     setEditingId(product.id)
     setSlugTouched(true)
     setDraft({
@@ -102,32 +106,40 @@ const AdminProducts = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
-    let payload = buildPayload()
+    setNotice('')
+    setError('')
 
-    if (draft.thumbnailFile) {
-      payload.thumbnail = await uploadFileAndGetUrl({
-        file: draft.thumbnailFile,
-        bucket: 'product-media',
-        folder: payload.slug || 'products',
-      })
-    }
+    try {
+      let payload = buildPayload()
 
-    if (draft.digitalFile) {
-      payload.digital_file_url = await uploadFileAndGetUrl({
-        file: draft.digitalFile,
-        bucket: 'product-files',
-        folder: payload.slug || 'downloads',
-      })
-    }
-
-    const saved = await saveProduct(payload)
-    setProducts((prev) => {
-      if (editingId) {
-        return prev.map((item) => (item.id === saved.id ? saved : item))
+      if (draft.thumbnailFile) {
+        payload.thumbnail = await uploadFileAndGetUrl({
+          file: draft.thumbnailFile,
+          bucket: 'product-media',
+          folder: payload.slug || 'products',
+        })
       }
-      return [saved, ...prev]
-    })
-    resetForm()
+
+      if (draft.digitalFile) {
+        payload.digital_file_url = await uploadFileAndGetUrl({
+          file: draft.digitalFile,
+          bucket: 'product-files',
+          folder: payload.slug || 'downloads',
+        })
+      }
+
+      const saved = await saveProduct(payload)
+      setProducts((prev) => {
+        if (editingId) {
+          return prev.map((item) => (item.id === saved.id ? saved : item))
+        }
+        return [saved, ...prev]
+      })
+      setNotice(editingId ? 'Product updated.' : 'Product added.')
+      resetForm()
+    } catch (err) {
+      setError(err.message || 'Unable to save product.')
+    }
   }
 
   const handleFileChange = (field) => (event) => {
@@ -136,19 +148,33 @@ const AdminProducts = () => {
   }
 
   const handleDelete = async (id) => {
-    await deleteProduct(id)
-    setProducts((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, archived: true } : item,
-      ),
-    )
+    setNotice('')
+    setError('')
+    try {
+      await deleteProduct(id)
+      setProducts((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, archived: true } : item,
+        ),
+      )
+      setNotice('Product archived.')
+    } catch (err) {
+      setError(err.message || 'Unable to archive product.')
+    }
   }
 
   const handleToggleArchive = async (product) => {
-    const updated = await setProductArchived(product.id, !product.archived)
-    setProducts((prev) =>
-      prev.map((item) => (item.id === product.id ? updated : item)),
-    )
+    setNotice('')
+    setError('')
+    try {
+      const updated = await setProductArchived(product.id, !product.archived)
+      setProducts((prev) =>
+        prev.map((item) => (item.id === product.id ? updated : item)),
+      )
+      setNotice(updated.archived ? 'Product archived.' : 'Product unarchived.')
+    } catch (err) {
+      setError(err.message || 'Unable to update archive status.')
+    }
   }
 
   const sortedProducts = useMemo(
@@ -175,6 +201,8 @@ const AdminProducts = () => {
     <div className="admin-grid">
       <section className="admin-card">
         <h3>{editingId ? 'Edit product' : 'Add product'}</h3>
+        {notice && <div className="success-card">{notice}</div>}
+        {error && <p className="form-error">{error}</p>}
         <form onSubmit={handleSubmit} className="form-grid">
           <label className="form-field">
             Title
@@ -272,7 +300,15 @@ const AdminProducts = () => {
             <button type="submit" className="button primary">
               {editingId ? 'Save changes' : 'Add product'}
             </button>
-            <button type="button" className="button ghost" onClick={resetForm}>
+            <button
+              type="button"
+              className="button ghost"
+              onClick={() => {
+                resetForm()
+                setNotice('Form cleared.')
+                setError('')
+              }}
+            >
               Clear
             </button>
           </div>
