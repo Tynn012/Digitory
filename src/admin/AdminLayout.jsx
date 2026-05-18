@@ -303,7 +303,7 @@ const AdminLayout = () => {
 
   if (!hasSupabase) {
     return (
-      <div className="admin-shell admin-auth-shell centered">
+      <div className="admin-shell admin-auth-shell">
         <section className="admin-auth">
           <div className="admin-auth-card admin-auth-status">
             <header className="admin-auth-header">
