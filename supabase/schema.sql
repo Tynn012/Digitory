@@ -1,3 +1,9 @@
+drop schema if exists public cascade;
+create schema public;
+
+grant usage on schema public to postgres, anon, authenticated, service_role;
+grant all on schema public to postgres;
+
 create extension if not exists "pgcrypto";
 
 create table if not exists admin_users (
