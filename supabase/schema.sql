@@ -1,18 +1,23 @@
-drop schema if exists public cascade;
-create schema public;
+/*
+  Minimal Supabase schema for Digitory
+  - Defines core tables: admin_users, products, orders, branding
+  - Adds timestamp triggers, `is_admin()` helper, RLS enablement, and essential policies
+  - Creates storage buckets used by the app
+  Run this in the Supabase SQL editor. This file intentionally excludes sample seed data.
+*/
 
-grant usage on schema public to postgres, anon, authenticated, service_role;
-grant all on schema public to postgres;
-
+-- Required extension
 create extension if not exists "pgcrypto";
 
-create table if not exists admin_users (
+-- Admin users (references auth.users)
+create table if not exists public.admin_users (
   user_id uuid primary key references auth.users(id) on delete cascade,
   role text default 'admin',
   created_at timestamptz default now()
 );
 
-create table if not exists products (
+-- Products
+create table if not exists public.products (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz default now(),
   updated_at timestamptz default now(),
@@ -30,11 +35,12 @@ create table if not exists products (
   metadata jsonb default '{}'::jsonb
 );
 
-create table if not exists orders (
+-- Orders
+create table if not exists public.orders (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz default now(),
   updated_at timestamptz default now(),
-  product_id uuid references products(id) on delete set null,
+  product_id uuid references public.products(id) on delete set null,
   product_slug text,
   product_title text,
   amount numeric(10,2),
@@ -52,7 +58,8 @@ create table if not exists orders (
   metadata jsonb default '{}'::jsonb
 );
 
-create table if not exists branding (
+-- Branding
+create table if not exists public.branding (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz default now(),
   updated_at timestamptz default now(),
@@ -65,17 +72,11 @@ create table if not exists branding (
   metadata jsonb default '{}'::jsonb
 );
 
-alter table orders add column if not exists buyer_email text;
-alter table products add column if not exists archived boolean default false;
-alter table orders add column if not exists download_token text;
-alter table orders add column if not exists download_url text;
-alter table orders add column if not exists payment_method text default 'manual_gcash';
-alter table orders add column if not exists receipt_sent_at timestamptz;
+-- Indexes
+create unique index if not exists orders_download_token_idx on public.orders (download_token);
 
-create unique index if not exists orders_download_token_idx
-  on orders (download_token);
-
-create or replace function set_updated_at()
+-- Trigger helper to set updated_at
+create or replace function public.set_updated_at()
 returns trigger as $$
 begin
   new.updated_at = now();
@@ -84,168 +85,75 @@ end;
 $$ language plpgsql;
 
 create trigger set_products_updated_at
-before update on products
+before update on public.products
 for each row
-execute procedure set_updated_at();
+execute procedure public.set_updated_at();
 
 create trigger set_orders_updated_at
-before update on orders
+before update on public.orders
 for each row
-execute procedure set_updated_at();
+execute procedure public.set_updated_at();
 
 create trigger set_branding_updated_at
-before update on branding
+before update on public.branding
 for each row
-execute procedure set_updated_at();
+execute procedure public.set_updated_at();
 
-insert into products (
-  title,
-  slug,
-  description,
-  price,
-  category,
-  featured,
-  thumbnail,
-  images,
-  tags,
-  digital_file_url,
-  metadata
-)
-select *
-from (
-  values
-    (
-      'Budget Glow Sheet',
-      'budget-glow-sheet',
-      'A clean monthly budget spreadsheet with cashflow summaries and goal tracking tabs.',
-      249,
-      'Budget Templates',
-      true,
-      'https://placehold.co/800x600/e6fff8/0f1c20?text=Budget+Glow',
-      '["https://placehold.co/1200x800/e6fff8/0f1c20?text=Budget+Glow","https://placehold.co/1200x800/fff7e6/0f1c20?text=Budget+Overview"]'::jsonb,
-      array['budget', 'monthly', 'spreadsheet'],
-      '',
-      '{"format":"xlsx","pages":12}'::jsonb
-    ),
-    (
-      'Weekly Focus Planner',
-      'weekly-focus-planner',
-      'Plan your week with time blocks, priorities, and a review zone to stay aligned.',
-      199,
-      'Productivity Sheets',
-      true,
-      'https://placehold.co/800x600/ffe9e0/0f1c20?text=Weekly+Focus',
-      '["https://placehold.co/1200x800/ffe9e0/0f1c20?text=Weekly+Focus","https://placehold.co/1200x800/e6fff8/0f1c20?text=Priority+Lanes"]'::jsonb,
-      array['weekly', 'planning', 'focus'],
-      '',
-      '{"format":"pdf","pages":6}'::jsonb
-    ),
-    (
-      'Monthly Cashflow Dashboard',
-      'monthly-cashflow-dashboard',
-      'Track income streams, subscriptions, and savings with month-over-month insights.',
-      349,
-      'Finance Trackers',
-      true,
-      'https://placehold.co/800x600/e8f2ff/0f1c20?text=Cashflow+Dashboard',
-      '["https://placehold.co/1200x800/e8f2ff/0f1c20?text=Cashflow+Dashboard","https://placehold.co/1200x800/e6fff8/0f1c20?text=Income+Split"]'::jsonb,
-      array['finance', 'dashboard', 'cashflow'],
-      '',
-      '{"format":"xlsx","pages":7}'::jsonb
-    ),
-    (
-      'Client Invoice Pack',
-      'client-invoice-pack',
-      'Professional invoice, quote, and payment reminder templates for client work.',
-      279,
-      'Printable Assets',
-      false,
-      'https://placehold.co/800x600/ffe9e0/0f1c20?text=Invoice+Pack',
-      '["https://placehold.co/1200x800/ffe9e0/0f1c20?text=Invoice+Pack","https://placehold.co/1200x800/e8f2ff/0f1c20?text=Quote+Template"]'::jsonb,
-      array['invoice', 'freelance', 'business'],
-      '',
-      '{"format":"pdf","pages":14}'::jsonb
-    ),
-    (
-      'Notion Reading Vault',
-      'notion-reading-vault',
-      'A reading and highlights tracker with note capture, ratings, and yearly stats.',
-      189,
-      'Study Planners',
-      false,
-      'https://placehold.co/800x600/e8f2ff/0f1c20?text=Reading+Vault',
-      '["https://placehold.co/1200x800/e8f2ff/0f1c20?text=Reading+Vault","https://placehold.co/1200x800/e6fff8/0f1c20?text=Highlights+Board"]'::jsonb,
-      array['notion', 'reading', 'knowledge'],
-      '',
-      '{"format":"notion","pages":1}'::jsonb
-    )
-) as sample(
-  title,
-  slug,
-  description,
-  price,
-  category,
-  featured,
-  thumbnail,
-  images,
-  tags,
-  digital_file_url,
-  metadata
-)
-where not exists (select 1 from products)
-on conflict (slug) do nothing;
-
-create or replace function is_admin()
+-- Helper to check admin role
+create or replace function public.is_admin()
 returns boolean as $$
   select exists (
-    select 1 from admin_users where user_id = auth.uid()
+    select 1 from public.admin_users where user_id = auth.uid()
   );
 $$ language sql stable;
 
-alter table products enable row level security;
-alter table orders enable row level security;
-alter table branding enable row level security;
-alter table admin_users enable row level security;
+-- Enable Row Level Security
+alter table public.products enable row level security;
+alter table public.orders enable row level security;
+alter table public.branding enable row level security;
+alter table public.admin_users enable row level security;
 
-create policy "Products are viewable by everyone"
-  on products for select
+-- Policies
+create policy if not exists "Products are viewable by everyone"
+  on public.products for select
   using (true);
 
-create policy "Products are editable by admins"
-  on products for all
-  using (is_admin())
-  with check (is_admin());
+create policy if not exists "Products are editable by admins"
+  on public.products for all
+  using (public.is_admin())
+  with check (public.is_admin());
 
-create policy "Orders can be created by anyone"
-  on orders for insert
+create policy if not exists "Orders can be created by anyone"
+  on public.orders for insert
   with check (true);
 
-create policy "Orders are viewable by admins"
-  on orders for select
-  using (is_admin());
+create policy if not exists "Orders are viewable by admins"
+  on public.orders for select
+  using (public.is_admin());
 
-create policy "Orders are editable by admins"
-  on orders for update
-  using (is_admin())
-  with check (is_admin());
+create policy if not exists "Orders are editable by admins"
+  on public.orders for update
+  using (public.is_admin())
+  with check (public.is_admin());
 
-create policy "Orders are deletable by admins"
-  on orders for delete
-  using (is_admin());
+create policy if not exists "Orders are deletable by admins"
+  on public.orders for delete
+  using (public.is_admin());
 
-create policy "Branding is viewable by everyone"
-  on branding for select
+create policy if not exists "Branding is viewable by everyone"
+  on public.branding for select
   using (true);
 
-create policy "Branding is editable by admins"
-  on branding for all
-  using (is_admin())
-  with check (is_admin());
+create policy if not exists "Branding is editable by admins"
+  on public.branding for all
+  using (public.is_admin())
+  with check (public.is_admin());
 
-create policy "Admin users can view themselves"
-  on admin_users for select
+create policy if not exists "Admin users can view themselves"
+  on public.admin_users for select
   using (user_id = auth.uid());
 
+-- Storage buckets used by the app
 insert into storage.buckets (id, name, public)
 values
   ('product-media', 'product-media', true),
@@ -253,110 +161,27 @@ values
 on conflict (id) do update
 set public = excluded.public;
 
-drop policy if exists "Admins can upload product media" on storage.objects;
-create policy "Admins can upload product media"
-  on storage.objects for insert
-  to authenticated
-  with check (
-    bucket_id = 'product-media'
-    and exists (
-      select 1
-      from public.admin_users
-      where user_id = auth.uid()
-    )
-  );
-
-drop policy if exists "Admins can update product media" on storage.objects;
-create policy "Admins can update product media"
-  on storage.objects for update
+-- Storage policies: allow authenticated admin users to insert/update objects in the buckets
+drop policy if exists "Admins can manage product media" on storage.objects;
+create policy "Admins can manage product media"
+  on storage.objects for all
   to authenticated
   using (
-    bucket_id = 'product-media'
-    and exists (
-      select 1
-      from public.admin_users
-      where user_id = auth.uid()
-    )
+    bucket_id = 'product-media' and exists (select 1 from public.admin_users where user_id = auth.uid())
   )
   with check (
-    bucket_id = 'product-media'
-    and exists (
-      select 1
-      from public.admin_users
-      where user_id = auth.uid()
-    )
+    bucket_id = 'product-media' and exists (select 1 from public.admin_users where user_id = auth.uid())
   );
 
-drop policy if exists "Admins can upload product files" on storage.objects;
-create policy "Admins can upload product files"
-  on storage.objects for insert
-  to authenticated
-  with check (
-    bucket_id = 'product-files'
-    and exists (
-      select 1
-      from public.admin_users
-      where user_id = auth.uid()
-    )
-  );
-
-drop policy if exists "Admins can update product files" on storage.objects;
-create policy "Admins can update product files"
-  on storage.objects for update
+drop policy if exists "Admins can manage product files" on storage.objects;
+create policy "Admins can manage product files"
+  on storage.objects for all
   to authenticated
   using (
-    bucket_id = 'product-files'
-    and exists (
-      select 1
-      from public.admin_users
-      where user_id = auth.uid()
-    )
+    bucket_id = 'product-files' and exists (select 1 from public.admin_users where user_id = auth.uid())
   )
   with check (
-    bucket_id = 'product-files'
-    and exists (
-      select 1
-      from public.admin_users
-      where user_id = auth.uid()
-    )
+    bucket_id = 'product-files' and exists (select 1 from public.admin_users where user_id = auth.uid())
   );
 
--- Seed sample orders for local/dev environments when orders table is empty
-insert into orders (
-  product_slug,
-  product_title,
-  amount,
-  customer_name,
-  buyer_email,
-  status,
-  paid_at,
-  download_unlocked,
-  download_token,
-  payment_method,
-  created_at,
-  updated_at
-)
-select *
-from (
-  values
-    ('budget-glow-sheet','Budget Glow Sheet',249,'Alice Rivera','alice@example.com','paid', now() - interval '2 days', true, 'dl-ord-1','manual_gcash', now() - interval '2 days', now() - interval '2 days'),
-    ('weekly-focus-planner','Weekly Focus Planner',199,'Ben Torres','ben@example.com','paid', now() - interval '5 days', true, 'dl-ord-2','manual_gcash', now() - interval '5 days', now() - interval '5 days'),
-    ('monthly-cashflow-dashboard','Monthly Cashflow Dashboard',349,'Clara Sung','clara@example.com','paid', now() - interval '8 days', true, 'dl-ord-3','manual_gcash', now() - interval '8 days', now() - interval '8 days'),
-    ('debt-snowball-tracker','Debt Snowball Tracker',299,'Diego Mar','diego@example.com','pending', null, false, 'dl-ord-4','manual_gcash', now() - interval '12 days', now() - interval '12 days'),
-    ('client-invoice-pack','Client Invoice Pack',279,'Eve Nolan','eve@example.com','paid', now() - interval '20 days', true, 'dl-ord-5','manual_gcash', now() - interval '20 days', now() - interval '20 days')
-) as s(
-  product_slug,
-  product_title,
-  amount,
-  customer_name,
-  buyer_email,
-  status,
-  paid_at,
-  download_unlocked,
-  download_token,
-  payment_method,
-  created_at,
-  updated_at
-)
-where not exists (select 1 from orders);
 
