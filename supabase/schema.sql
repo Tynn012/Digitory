@@ -1,10 +1,12 @@
-/*
-  Minimal Supabase schema for Digitory
-  - Defines core tables: admin_users, products, orders, branding
-  - Adds timestamp triggers, `is_admin()` helper, RLS enablement, and essential policies
-  - Creates storage buckets used by the app
-  Run this in the Supabase SQL editor. This file intentionally excludes sample seed data.
-*/
+drop schema if exists public cascade;
+create schema public;
+
+-- Grants required for REST API access (RLS still applies)
+grant usage on schema public to anon, authenticated, service_role;
+grant all on schema public to postgres;
+grant select, insert, update, delete on all tables in schema public to anon, authenticated, service_role;
+grant usage, select on all sequences in schema public to anon, authenticated, service_role;
+grant execute on all functions in schema public to anon, authenticated, service_role;
 
 -- Required extension
 create extension if not exists "pgcrypto";
@@ -114,42 +116,51 @@ alter table public.branding enable row level security;
 alter table public.admin_users enable row level security;
 
 -- Policies
-create policy if not exists "Products are viewable by everyone"
+drop policy if exists "Products are viewable by everyone" on public.products;
+create policy "Products are viewable by everyone"
   on public.products for select
   using (true);
 
-create policy if not exists "Products are editable by admins"
+drop policy if exists "Products are editable by admins" on public.products;
+create policy "Products are editable by admins"
   on public.products for all
   using (public.is_admin())
   with check (public.is_admin());
 
-create policy if not exists "Orders can be created by anyone"
+drop policy if exists "Orders can be created by anyone" on public.orders;
+create policy "Orders can be created by anyone"
   on public.orders for insert
   with check (true);
 
-create policy if not exists "Orders are viewable by admins"
+drop policy if exists "Orders are viewable by admins" on public.orders;
+create policy "Orders are viewable by admins"
   on public.orders for select
   using (public.is_admin());
 
-create policy if not exists "Orders are editable by admins"
+drop policy if exists "Orders are editable by admins" on public.orders;
+create policy "Orders are editable by admins"
   on public.orders for update
   using (public.is_admin())
   with check (public.is_admin());
 
-create policy if not exists "Orders are deletable by admins"
+drop policy if exists "Orders are deletable by admins" on public.orders;
+create policy "Orders are deletable by admins"
   on public.orders for delete
   using (public.is_admin());
 
-create policy if not exists "Branding is viewable by everyone"
+drop policy if exists "Branding is viewable by everyone" on public.branding;
+create policy "Branding is viewable by everyone"
   on public.branding for select
   using (true);
 
-create policy if not exists "Branding is editable by admins"
+drop policy if exists "Branding is editable by admins" on public.branding;
+create policy "Branding is editable by admins"
   on public.branding for all
   using (public.is_admin())
   with check (public.is_admin());
 
-create policy if not exists "Admin users can view themselves"
+drop policy if exists "Admin users can view themselves" on public.admin_users;
+create policy "Admin users can view themselves"
   on public.admin_users for select
   using (user_id = auth.uid());
 
