@@ -3,6 +3,7 @@ import { categories } from '../data/products'
 import { fetchProducts, saveProduct, deleteProduct, setProductArchived } from '../lib/products'
 import { slugify } from '../lib/format'
 import EmptyState from '../components/EmptyState'
+import { uploadFileAndGetUrl } from '../lib/uploads'
 
 const defaultDraft = {
   title: '',
@@ -12,9 +13,11 @@ const defaultDraft = {
   category: '',
   featured: false,
   thumbnail: '',
+  thumbnailFile: null,
   images: '',
   tags: '',
   digital_file_url: '',
+  digitalFile: null,
 }
 
 const AdminProducts = () => {
@@ -63,9 +66,11 @@ const AdminProducts = () => {
       category: product.category || '',
       featured: Boolean(product.featured),
       thumbnail: product.thumbnail || '',
+      thumbnailFile: null,
       images: Array.isArray(product.images) ? product.images.join('\n') : '',
       tags: Array.isArray(product.tags) ? product.tags.join(', ') : '',
       digital_file_url: product.digital_file_url || '',
+      digitalFile: null,
     })
   }
 
@@ -97,7 +102,24 @@ const AdminProducts = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
-    const payload = buildPayload()
+    let payload = buildPayload()
+
+    if (draft.thumbnailFile) {
+      payload.thumbnail = await uploadFileAndGetUrl({
+        file: draft.thumbnailFile,
+        bucket: 'product-media',
+        folder: payload.slug || 'products',
+      })
+    }
+
+    if (draft.digitalFile) {
+      payload.digital_file_url = await uploadFileAndGetUrl({
+        file: draft.digitalFile,
+        bucket: 'product-files',
+        folder: payload.slug || 'downloads',
+      })
+    }
+
     const saved = await saveProduct(payload)
     setProducts((prev) => {
       if (editingId) {
@@ -106,6 +128,11 @@ const AdminProducts = () => {
       return [saved, ...prev]
     })
     resetForm()
+  }
+
+  const handleFileChange = (field) => (event) => {
+    const file = event.target.files?.[0] || null
+    setDraft((prev) => ({ ...prev, [field]: file }))
   }
 
   const handleDelete = async (id) => {
@@ -207,6 +234,14 @@ const AdminProducts = () => {
             />
           </label>
           <label className="form-field">
+            Upload thumbnail image
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange('thumbnailFile')}
+            />
+          </label>
+          <label className="form-field">
             Image URLs (comma or new line)
             <textarea
               rows="3"
@@ -224,6 +259,13 @@ const AdminProducts = () => {
               type="text"
               value={draft.digital_file_url}
               onChange={handleChange('digital_file_url')}
+            />
+          </label>
+          <label className="form-field">
+            Upload downloadable file
+            <input
+              type="file"
+              onChange={handleFileChange('digitalFile')}
             />
           </label>
           <div className="form-actions">

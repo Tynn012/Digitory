@@ -240,6 +240,81 @@ create policy "Admin users can view themselves"
   on admin_users for select
   using (user_id = auth.uid());
 
+insert into storage.buckets (id, name, public)
+values
+  ('product-media', 'product-media', true),
+  ('product-files', 'product-files', true)
+on conflict (id) do update
+set public = excluded.public;
+
+drop policy if exists "Admins can upload product media" on storage.objects;
+create policy "Admins can upload product media"
+  on storage.objects for insert
+  to authenticated
+  with check (
+    bucket_id = 'product-media'
+    and exists (
+      select 1
+      from public.admin_users
+      where user_id = auth.uid()
+    )
+  );
+
+drop policy if exists "Admins can update product media" on storage.objects;
+create policy "Admins can update product media"
+  on storage.objects for update
+  to authenticated
+  using (
+    bucket_id = 'product-media'
+    and exists (
+      select 1
+      from public.admin_users
+      where user_id = auth.uid()
+    )
+  )
+  with check (
+    bucket_id = 'product-media'
+    and exists (
+      select 1
+      from public.admin_users
+      where user_id = auth.uid()
+    )
+  );
+
+drop policy if exists "Admins can upload product files" on storage.objects;
+create policy "Admins can upload product files"
+  on storage.objects for insert
+  to authenticated
+  with check (
+    bucket_id = 'product-files'
+    and exists (
+      select 1
+      from public.admin_users
+      where user_id = auth.uid()
+    )
+  );
+
+drop policy if exists "Admins can update product files" on storage.objects;
+create policy "Admins can update product files"
+  on storage.objects for update
+  to authenticated
+  using (
+    bucket_id = 'product-files'
+    and exists (
+      select 1
+      from public.admin_users
+      where user_id = auth.uid()
+    )
+  )
+  with check (
+    bucket_id = 'product-files'
+    and exists (
+      select 1
+      from public.admin_users
+      where user_id = auth.uid()
+    )
+  );
+
 -- Seed sample orders for local/dev environments when orders table is empty
 insert into orders (
   product_slug,
