@@ -10,3 +10,13 @@ export const supabase = isSupabaseConfigured
       auth: { persistSession: true, autoRefreshToken: true },
     })
   : null
+
+// Expose the client on window for quick browser debugging in development only
+try {
+  if (import.meta.env.DEV && typeof window !== 'undefined' && supabase) {
+    // Non-blocking, useful for debugging in DevTools: use `window.__supabase`
+    window.__supabase = supabase
+  }
+} catch (e) {
+  // ignore in non-browser environments
+}
