@@ -25,7 +25,9 @@ How it works:
   - Database (PostgreSQL)
   - Authentication (admin login)
   - Storage (proof uploads)
-  - Edge Functions (serverless functions for email/download logic)
+  - API access (for authenticated admin actions)
+
+- **Vercel API Routes**: Serverless functions for email and download validation.
 
 How it works:
 - Frontend sends requests to Supabase tables/functions.
@@ -35,7 +37,7 @@ How it works:
 ### Hosting and Deployment
 - **Vercel** hosts the frontend app.
 - `vercel.json` handles SPA rewrites so refresh works on all routes.
-- Supabase hosts database/auth/functions separately.
+- Supabase hosts database/auth separately.
 
 Integration summary:
 - Vercel serves the website.
@@ -59,10 +61,10 @@ Integration summary:
 
 ### C. Shared Logic (`src/lib`)
 - `supabaseClient.js`: creates Supabase client connection
-- `auth.jsx`: session + admin role checking
+- `supabaseClient.js`: Supabase client + admin allowlist helper
 - `products.js`: product CRUD operations
 - `orders.js`: order creation/update and download token flow
-- `receipts.js`: calls edge function to send receipt email
+- `receipts.js`: calls Vercel API to send receipt email
 - `paymentMode.js`: switch between manual and gateway mode
 
 ## 3.1 Suggested Project Structure (Simplified)
@@ -71,7 +73,7 @@ Integration summary:
 - `src/lib`: business logic and service connectors
 - `src/data`: static seed/category data
 - `supabase/schema.sql`: tables, policies, and seed setup
-- `supabase/functions`: serverless logic for email/download operations
+- `api`: serverless logic for email/download operations
 
 Why this structure works:
 - It separates UI, logic, and backend resources clearly.
@@ -85,8 +87,8 @@ Example: Customer places an order
 3. Order data is written to Supabase `orders` table.
 4. Admin opens dashboard and reviews order.
 5. Admin marks order as paid and sends receipt.
-6. Edge Function sends email with tokenized download route.
-7. Customer opens link and `get-download` validates token state.
+6. Vercel API route sends email with tokenized download route.
+7. Customer opens link and the API validates token state.
 
 This flow ensures customer actions and admin verification stay organized.
 
@@ -95,12 +97,11 @@ Main tables:
 - `products`: digital items being sold
 - `orders`: customer purchase records and status
 - `branding`: editable brand content/colors
-- `admin_users`: users allowed to access admin panel
 
 Security:
 - Row Level Security (RLS) policies are enabled.
 - Public users can browse products and create orders.
-- Only admin users can manage products, orders, and branding.
+- Only authenticated admin users (allowlisted in the UI) can manage products, orders, and branding.
 
 ## 5. Email and Download Integration
 Current flow (manual verification):
@@ -109,14 +110,20 @@ Current flow (manual verification):
 3. System sends receipt email with download link.
 4. Customer opens tokenized download route.
 
-Edge Functions involved:
-- `send-receipt`: sends email through Resend API.
-- `get-download`: validates token and returns allowed download info.
+Vercel API routes involved:
+- `/api/send-receipt`: sends receipt email through SMTP.
+- `/api/get-download`: validates token and returns download info.
 
-Required function secrets in Supabase:
-- `RESEND_API_KEY`
-- `FROM_EMAIL`
+Required server environment variables:
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_USER`
+- `SMTP_PASS`
+- `SMTP_SECURE`
+- `MAIL_FROM`
 - `SITE_URL`
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
 
 ## 6. Payment Mode Integration
 The app supports a mode switch via environment variable:
@@ -130,12 +137,11 @@ Frontend env values:
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
 - `VITE_PAYMENT_MODE`
+- `VITE_ADMIN_EMAILS`
 
 Where to place them:
 - In local `.env`
-- In Vercel project environment settings (for frontend values)
-
-Supabase secrets are configured in Supabase Edge Functions settings.
+- In Vercel project environment settings
 
 ## 7.1 Deployment Workflow (Practical)
 1. Develop and test locally.
@@ -143,14 +149,13 @@ Supabase secrets are configured in Supabase Edge Functions settings.
 3. Push code to repository.
 4. Deploy frontend in Vercel.
 5. Apply/verify Supabase schema.
-6. Deploy edge functions in Supabase.
-7. Configure environment variables and secrets.
-8. Run live smoke tests (checkout -> admin verify -> email -> download).
+6. Configure environment variables and secrets in Vercel.
+7. Run live smoke tests (checkout -> admin verify -> email -> download).
 
 ## 7.2 Hosting Responsibilities
 - Vercel: serves static frontend and route rewrites.
-- Supabase: stores data, handles auth, executes edge functions.
-- Resend: sends transactional emails from server-side function.
+- Supabase: stores data and handles auth.
+- Vercel: runs server-side API routes that send emails via SMTP.
 
 This separation keeps secrets out of frontend code and improves security.
 
@@ -162,7 +167,7 @@ This separation keeps secrets out of frontend code and improves security.
 - **PostgreSQL**: The database engine used by Supabase.
 - **Authentication**: Login process that verifies user identity.
 - **RLS (Row Level Security)**: Rules that control which rows a user can access.
-- **Edge Function**: Lightweight server-side function run on demand.
+- **Serverless Function**: Lightweight server-side function run on demand (Vercel API routes).
 - **Token**: Unique string used to verify access (ex: download link).
 - **SPA (Single Page Application)**: Website that updates pages without full reloads.
 - **Deployment**: Process of publishing the app online.
@@ -174,7 +179,7 @@ This separation keeps secrets out of frontend code and improves security.
 3. Product data comes from Supabase database.
 4. User submits checkout details.
 5. Admin verifies payment in dashboard.
-6. Edge Function sends email with download link.
+6. Vercel API sends email with download link.
 7. Download token is validated before file access is shown.
 
 This setup separates concerns clearly:
@@ -191,12 +196,12 @@ This setup separates concerns clearly:
 
 ## 11. Basic Troubleshooting Guide
 - Problem: Admin cannot access dashboard.
-  - Check if user exists in `admin_users` table.
-  - Verify Supabase auth session and RLS policies.
+  - Confirm the admin email is in VITE_ADMIN_EMAILS.
+  - Ensure Supabase Auth MFA (TOTP) is enabled.
 
 - Problem: Email not sending.
-  - Confirm `RESEND_API_KEY`, `FROM_EMAIL`, and `SITE_URL` are set.
-  - Check if sender domain is verified in Resend.
+  - Confirm SMTP credentials and `SITE_URL` are set.
+  - Check the SMTP provider for delivery errors.
 
 - Problem: Download link fails.
   - Verify `download_token` exists for the order.

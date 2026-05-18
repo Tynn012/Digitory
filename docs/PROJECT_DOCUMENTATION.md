@@ -65,8 +65,8 @@ Digitory follows a web application architecture with integrated managed backend 
 
 - Frontend layer: React + Vite application for UI and routing
 - Service layer: Supabase client and application libraries
-- Data layer: PostgreSQL tables for products, orders, branding, and admin users
-- Serverless layer: Edge functions for email dispatch and download validation
+- Data layer: PostgreSQL tables for products, orders, and branding
+- Serverless layer: Vercel API routes for email dispatch and download validation
 - Hosting layer: Vercel for frontend delivery
 
 This structure separates presentation, business logic, and data operations to simplify maintenance and future expansion.
@@ -77,8 +77,9 @@ This structure separates presentation, business logic, and data operations to si
 - JavaScript
 - React
 - Vite
-- Supabase (PostgreSQL, Auth, Edge Functions, Storage)
+- Supabase (PostgreSQL, Auth, Storage)
 - Vercel (deployment and hosting)
+- Vercel API routes (server-side email + download validation)
 
 ## 8. Methodology
 The system was developed using an iterative process:

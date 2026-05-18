@@ -150,13 +150,18 @@ export const deleteOrder = async (id) => {
 }
 
 export const fetchDownloadDetails = async (token) => {
-  if (!supabase) {
-    throw new Error('Supabase is not configured.')
-  }
-  const { data, error } = await supabase.functions.invoke('get-download', {
-    body: { token },
+  const response = await fetch('/api/get-download', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ token }),
   })
-  if (error) throw error
+
+  const data = await response.json().catch(() => ({}))
+  if (!response.ok) {
+    throw new Error(data?.error || 'Unable to load download details.')
+  }
   return data
 }
 

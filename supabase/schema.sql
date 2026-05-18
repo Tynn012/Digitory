@@ -11,13 +11,6 @@ grant execute on all functions in schema public to anon, authenticated, service_
 -- Required extension
 create extension if not exists "pgcrypto";
 
--- Admin users (references auth.users)
-create table if not exists public.admin_users (
-  user_id uuid primary key references auth.users(id) on delete cascade,
-  role text default 'admin',
-  created_at timestamptz default now()
-);
-
 -- Products
 create table if not exists public.products (
   id uuid primary key default gen_random_uuid(),
@@ -101,19 +94,10 @@ before update on public.branding
 for each row
 execute procedure public.set_updated_at();
 
--- Helper to check admin role
-create or replace function public.is_admin()
-returns boolean as $$
-  select exists (
-    select 1 from public.admin_users where user_id = auth.uid()
-  );
-$$ language sql stable;
-
 -- Enable Row Level Security
 alter table public.products enable row level security;
 alter table public.orders enable row level security;
 alter table public.branding enable row level security;
-alter table public.admin_users enable row level security;
 
 -- Policies
 drop policy if exists "Products are viewable by everyone" on public.products;
@@ -122,10 +106,10 @@ create policy "Products are viewable by everyone"
   using (true);
 
 drop policy if exists "Products are editable by admins" on public.products;
-create policy "Products are editable by admins"
+create policy "Products are editable by authenticated users"
   on public.products for all
-  using (public.is_admin())
-  with check (public.is_admin());
+  using (auth.role() = 'authenticated')
+  with check (auth.role() = 'authenticated');
 
 drop policy if exists "Orders can be created by anyone" on public.orders;
 create policy "Orders can be created by anyone"
@@ -133,20 +117,20 @@ create policy "Orders can be created by anyone"
   with check (true);
 
 drop policy if exists "Orders are viewable by admins" on public.orders;
-create policy "Orders are viewable by admins"
+create policy "Orders are viewable by authenticated users"
   on public.orders for select
-  using (public.is_admin());
+  using (auth.role() = 'authenticated');
 
 drop policy if exists "Orders are editable by admins" on public.orders;
-create policy "Orders are editable by admins"
+create policy "Orders are editable by authenticated users"
   on public.orders for update
-  using (public.is_admin())
-  with check (public.is_admin());
+  using (auth.role() = 'authenticated')
+  with check (auth.role() = 'authenticated');
 
 drop policy if exists "Orders are deletable by admins" on public.orders;
-create policy "Orders are deletable by admins"
+create policy "Orders are deletable by authenticated users"
   on public.orders for delete
-  using (public.is_admin());
+  using (auth.role() = 'authenticated');
 
 drop policy if exists "Branding is viewable by everyone" on public.branding;
 create policy "Branding is viewable by everyone"
@@ -154,15 +138,10 @@ create policy "Branding is viewable by everyone"
   using (true);
 
 drop policy if exists "Branding is editable by admins" on public.branding;
-create policy "Branding is editable by admins"
+create policy "Branding is editable by authenticated users"
   on public.branding for all
-  using (public.is_admin())
-  with check (public.is_admin());
-
-drop policy if exists "Admin users can view themselves" on public.admin_users;
-create policy "Admin users can view themselves"
-  on public.admin_users for select
-  using (user_id = auth.uid());
+  using (auth.role() = 'authenticated')
+  with check (auth.role() = 'authenticated');
 
 -- Storage buckets used by the app
 insert into storage.buckets (id, name, public)
@@ -174,25 +153,17 @@ set public = excluded.public;
 
 -- Storage policies: allow authenticated admin users to insert/update objects in the buckets
 drop policy if exists "Admins can manage product media" on storage.objects;
-create policy "Admins can manage product media"
+create policy "Authenticated users can manage product media"
   on storage.objects for all
   to authenticated
-  using (
-    bucket_id = 'product-media' and exists (select 1 from public.admin_users where user_id = auth.uid())
-  )
-  with check (
-    bucket_id = 'product-media' and exists (select 1 from public.admin_users where user_id = auth.uid())
-  );
+  using (bucket_id = 'product-media')
+  with check (bucket_id = 'product-media');
 
 drop policy if exists "Admins can manage product files" on storage.objects;
-create policy "Admins can manage product files"
+create policy "Authenticated users can manage product files"
   on storage.objects for all
   to authenticated
-  using (
-    bucket_id = 'product-files' and exists (select 1 from public.admin_users where user_id = auth.uid())
-  )
-  with check (
-    bucket_id = 'product-files' and exists (select 1 from public.admin_users where user_id = auth.uid())
-  );
+  using (bucket_id = 'product-files')
+  with check (bucket_id = 'product-files');
 
 

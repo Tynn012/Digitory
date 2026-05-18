@@ -1,6 +1,5 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import PublicLayout from './components/PublicLayout'
-import ProtectedRoute from './components/ProtectedRoute'
 import ScrollToTop from './components/ScrollToTop'
 import Home from './pages/Home'
 import Products from './pages/Products'
@@ -8,7 +7,6 @@ import ProductDetail from './pages/ProductDetail'
 import Checkout from './pages/Checkout'
 import Download from './pages/Download'
 import NotFound from './pages/NotFound'
-import AdminLogin from './admin/AdminLogin'
 import AdminLayout from './admin/AdminLayout'
 import AdminDashboard from './admin/AdminDashboard'
 import AdminProducts from './admin/AdminProducts'
@@ -28,15 +26,8 @@ function App() {
           <Route path="checkout/:slug" element={<Checkout />} />
           <Route path="download/:token" element={<Download />} />
         </Route>
-        <Route path="admin" element={<AdminLogin />} />
-        <Route
-          path="admin/*"
-          element={
-            <ProtectedRoute>
-              <AdminLayout />
-            </ProtectedRoute>
-          }
-        >
+        <Route path="admin" element={<AdminLayout />}>
+          <Route index element={<AdminDashboard />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="products" element={<AdminProducts />} />
           <Route path="orders" element={<AdminOrders />} />

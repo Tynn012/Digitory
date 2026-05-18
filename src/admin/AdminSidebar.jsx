@@ -1,16 +1,8 @@
-import { NavLink, useNavigate } from 'react-router-dom'
-import { useAuth } from '../lib/auth'
+import { NavLink } from 'react-router-dom'
 import { useBranding } from '../lib/branding'
 
-const AdminSidebar = () => {
-  const { signOut } = useAuth()
+const AdminSidebar = ({ onSignOut }) => {
   const { branding } = useBranding()
-  const navigate = useNavigate()
-
-  const handleSignOut = async () => {
-    await signOut()
-    navigate('/admin')
-  }
 
   return (
     <aside className="admin-sidebar">
@@ -28,7 +20,7 @@ const AdminSidebar = () => {
       <button
         type="button"
         className="button ghost admin-signout"
-        onClick={handleSignOut}
+        onClick={onSignOut}
       >
         Sign out
       </button>

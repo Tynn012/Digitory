@@ -11,6 +11,14 @@ export const supabase = isSupabaseConfigured
     })
   : null
 
+export const getAdminAllowlist = () => {
+  const raw = import.meta.env.VITE_ADMIN_EMAILS || ''
+  return raw
+    .split(',')
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean)
+}
+
 // Expose the client on window for quick browser debugging in development only
 try {
   if (import.meta.env.DEV && typeof window !== 'undefined' && supabase) {
