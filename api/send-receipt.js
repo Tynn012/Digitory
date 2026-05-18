@@ -166,6 +166,14 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ ok: true, downloadLink })
   } catch (error) {
+    console.error('Email delivery failed:', {
+      message: error?.message || String(error),
+      code: error?.code || null,
+      response: error?.response || null,
+      responseCode: error?.responseCode || null,
+      command: error?.command || null,
+    })
+
     if (!isProduction) {
       return res.status(500).json({
         error: 'Email delivery failed.',
