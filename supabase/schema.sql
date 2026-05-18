@@ -1,13 +1,6 @@
 drop schema if exists public cascade;
 create schema public;
 
--- Grants required for REST API access (RLS still applies)
-grant usage on schema public to anon, authenticated, service_role;
-grant all on schema public to postgres;
-grant select, insert, update, delete on all tables in schema public to anon, authenticated, service_role;
-grant usage, select on all sequences in schema public to anon, authenticated, service_role;
-grant execute on all functions in schema public to anon, authenticated, service_role;
-
 -- Required extension
 create extension if not exists "pgcrypto";
 
@@ -93,6 +86,26 @@ create trigger set_branding_updated_at
 before update on public.branding
 for each row
 execute procedure public.set_updated_at();
+
+-- Grants required for REST API access (RLS still applies)
+grant usage on schema public to anon, authenticated, service_role;
+grant all on schema public to postgres;
+grant select, insert, update, delete on all tables in schema public to anon, authenticated, service_role;
+grant usage, select on all sequences in schema public to anon, authenticated, service_role;
+grant execute on all functions in schema public to anon, authenticated, service_role;
+
+-- Ensure future tables/functions inherit the same privileges
+alter default privileges in schema public
+  grant select, insert, update, delete on tables
+  to anon, authenticated, service_role;
+
+alter default privileges in schema public
+  grant usage, select on sequences
+  to anon, authenticated, service_role;
+
+alter default privileges in schema public
+  grant execute on functions
+  to anon, authenticated, service_role;
 
 -- Enable Row Level Security
 alter table public.products enable row level security;
