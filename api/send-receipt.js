@@ -113,21 +113,38 @@ export default async function handler(req, res) {
   const amount = order.amount != null ? order.amount : body.amount
   const amountText = amount != null ? amount.toString() : ''
 
-  const subject = `Your receipt and download link: ${safeTitle}`
-  const text = `Hi ${safeName},\n\nThanks for your purchase of "${safeTitle}"!\n\nAmount: ${amountText}\nDownload link: ${downloadLink}\n\nIf you have any questions, reply to this email.\n\n- ${baseUrl}`
+  const subject = `Your Digitory receipt: ${safeTitle}`
+  const text = `Hi ${safeName},\n\nThanks for your purchase of "${safeTitle}". Your payment is confirmed.\n\nAmount: ${amountText}\nDownload link (keep this private): ${downloadLink}\n\nIf you have any questions, reply to this email.\n\n- Digitory`
   const html = `
-    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #0f1c20;">
-      <h2 style="margin: 0 0 12px;">Hi ${safeName},</h2>
-      <p style="margin: 0 0 12px;">Thanks for your purchase of <strong>${safeTitle}</strong>.</p>
-      <p style="margin: 0 0 12px;"><strong>Amount:</strong> ${amountText}</p>
-      <p style="margin: 16px 0;">
-        <a href="${downloadLink}" style="display: inline-block; padding: 12px 18px; background: #1bb3a8; color: #fff; text-decoration: none; border-radius: 999px;">
-          Download your file
-        </a>
-      </p>
-      <p style="margin: 16px 0;">If the button does not work, use this link:</p>
-      <p style="margin: 0 0 12px;"><a href="${downloadLink}">${downloadLink}</a></p>
-      <p style="margin: 24px 0 0;">- Digitory</p>
+    <div style="background: #f6f7f5; padding: 24px; font-family: Arial, sans-serif; color: #0f1c20;">
+      <div style="max-width: 640px; margin: 0 auto; background: #ffffff; border-radius: 20px; border: 1px solid #e7e7e0; padding: 28px;">
+        <p style="margin: 0 0 12px; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #1bb3a8; font-weight: 700;">Digitory</p>
+        <h2 style="margin: 0 0 8px;">Receipt and download link</h2>
+        <p style="margin: 0 0 16px; color: #5a6466;">Hi ${safeName}, thanks for your purchase. Your payment is confirmed.</p>
+
+        <div style="border: 1px solid #e7e7e0; border-radius: 14px; padding: 16px; background: #fafaf9; margin: 16px 0;">
+          <table width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse; font-size: 14px;">
+            <tr>
+              <td style="padding: 4px 0; color: #5a6466;">Product</td>
+              <td style="padding: 4px 0; text-align: right; font-weight: 600;">${safeTitle}</td>
+            </tr>
+            <tr>
+              <td style="padding: 4px 0; color: #5a6466;">Amount</td>
+              <td style="padding: 4px 0; text-align: right; font-weight: 600;">${amountText}</td>
+            </tr>
+          </table>
+        </div>
+
+        <p style="margin: 16px 0 6px; font-weight: 600;">Download your file</p>
+        <p style="margin: 0 0 16px; color: #5a6466;">Keep this link private. Anyone with it can access the download.</p>
+        <p style="margin: 0 0 18px;">
+          <a href="${downloadLink}" style="display: inline-block; padding: 12px 20px; background: #1bb3a8; color: #fff; text-decoration: none; border-radius: 999px; font-weight: 600;">Download</a>
+        </p>
+
+        <p style="margin: 0 0 8px; color: #5a6466;">If the button does not work, use this link:</p>
+        <p style="margin: 0 0 20px;"><a href="${downloadLink}" style="color: #1bb3a8; word-break: break-all;">${downloadLink}</a></p>
+        <p style="margin: 0; color: #5a6466;">Questions? Reply to this email.</p>
+      </div>
     </div>
   `
 

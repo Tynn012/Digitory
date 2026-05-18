@@ -91,6 +91,13 @@ const AdminOrders = () => {
   }
 
   const handleMarkPaid = async (order) => {
+    if (
+      typeof window !== 'undefined' &&
+      !window.confirm('Mark this order as paid and unlock the download?')
+    ) {
+      return
+    }
+
     setNotice('')
     setError('')
     const downloadToken = order.download_token || createDownloadToken()
@@ -105,39 +112,9 @@ const AdminOrders = () => {
       setOrders((prev) =>
         prev.map((item) => (item.id === order.id ? updated : item)),
       )
-
-      if (!updated.buyer_email) {
-        setNotice('Payment marked as paid. Add a buyer email to send receipt.')
-        return
-      }
-
-      const orderWithLink = await ensureDownloadLink(updated)
-
-      if (!orderWithLink.download_url) {
-        setNotice(
-          'Payment marked as paid. Add a download link before sending receipt.',
-        )
-        return
-      }
-
-      await sendReceiptEmail({
-        orderId: orderWithLink.id,
-        email: orderWithLink.buyer_email,
-        customerName: orderWithLink.customer_name,
-        productTitle: orderWithLink.product_title,
-        amount: orderWithLink.amount,
-        downloadToken: orderWithLink.download_token,
-      })
-
-      const withReceipt = await updateOrder(order.id, {
-        receipt_sent_at: new Date().toISOString(),
-      })
-      setOrders((prev) =>
-        prev.map((item) => (item.id === order.id ? withReceipt : item)),
-      )
-      setNotice('Receipt sent to buyer.')
+      setNotice('Payment marked as paid. Send receipt when ready.')
     } catch (err) {
-      setError(err.message || 'Unable to mark as paid or send receipt.')
+      setError(err.message || 'Unable to mark as paid.')
     }
   }
 
