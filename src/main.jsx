@@ -5,6 +5,7 @@ import App from './App.jsx'
 import { BrandingProvider } from './lib/branding'
 
 console.log(import.meta.env.VITE_SUPABASE_URL)
+console.log("-------")
 console.log(import.meta.env.VITE_SUPABASE_ANON_KEY)
 
 createRoot(document.getElementById('root')).render(
