@@ -843,6 +843,10 @@ p {
   min-height: 100dvh;
 }
 
+.admin-shell.admin-auth-shell {
+  grid-template-columns: 1fr;
+}
+
 .admin-sidebar {
   border-right: 1px solid var(--border);
   padding: 32px 24px;
