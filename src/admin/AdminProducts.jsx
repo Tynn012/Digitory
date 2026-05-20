@@ -3,7 +3,7 @@ import { categories } from '../data/products'
 import { fetchProducts, saveProduct, deleteProduct, setProductArchived } from '../lib/products'
 import { slugify } from '../lib/format'
 import EmptyState from '../components/EmptyState'
-import { uploadFileAndGetUrl } from '../lib/uploads'
+import { uploadFileAndGetUrl, uploadFilesAndGetUrls } from '../lib/uploads'
 
 const defaultDraft = {
   title: '',
@@ -15,6 +15,7 @@ const defaultDraft = {
   thumbnail: '',
   thumbnailFile: null,
   images: '',
+  imageFiles: [],
   tags: '',
   digital_file_url: '',
   digitalFile: null,
@@ -72,6 +73,7 @@ const AdminProducts = () => {
       thumbnail: product.thumbnail || '',
       thumbnailFile: null,
       images: Array.isArray(product.images) ? product.images.join('\n') : '',
+      imageFiles: [],
       tags: Array.isArray(product.tags) ? product.tags.join(', ') : '',
       digital_file_url: product.digital_file_url || '',
       digitalFile: null,
@@ -87,7 +89,7 @@ const AdminProducts = () => {
   const buildPayload = () => ({
     id: editingId,
     title: draft.title.trim(),
-    slug: draft.slug.trim(),
+    slug: draft.slug.trim() || slugify(draft.title),
     description: draft.description.trim(),
     price: Number(draft.price || 0),
     category: draft.category.trim(),
@@ -120,6 +122,14 @@ const AdminProducts = () => {
         })
       }
 
+      if (draft.imageFiles?.length) {
+        payload.images = await uploadFilesAndGetUrls({
+          files: draft.imageFiles,
+          bucket: 'product-media',
+          folder: payload.slug || 'products',
+        })
+      }
+
       if (draft.digitalFile) {
         payload.digital_file_url = await uploadFileAndGetUrl({
           file: draft.digitalFile,
@@ -145,6 +155,11 @@ const AdminProducts = () => {
   const handleFileChange = (field) => (event) => {
     const file = event.target.files?.[0] || null
     setDraft((prev) => ({ ...prev, [field]: file }))
+  }
+
+  const handleMultiFileChange = (field) => (event) => {
+    const files = Array.from(event.target.files || [])
+    setDraft((prev) => ({ ...prev, [field]: files }))
   }
 
   const handleDelete = async (id) => {
@@ -254,11 +269,12 @@ const AdminProducts = () => {
             Featured product
           </label>
           <label className="form-field">
-            Thumbnail URL
+            Thumbnail URL (optional)
             <input
               type="text"
               value={draft.thumbnail}
               onChange={handleChange('thumbnail')}
+              placeholder="Optional: paste an existing link"
             />
           </label>
           <label className="form-field">
@@ -270,11 +286,21 @@ const AdminProducts = () => {
             />
           </label>
           <label className="form-field">
-            Image URLs (comma or new line)
+            Upload gallery images
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleMultiFileChange('imageFiles')}
+            />
+          </label>
+          <label className="form-field">
+            Image URLs (optional, comma or new line)
             <textarea
               rows="3"
               value={draft.images}
               onChange={handleChange('images')}
+              placeholder="Optional: paste links instead of uploading"
             />
           </label>
           <label className="form-field">
@@ -282,11 +308,12 @@ const AdminProducts = () => {
             <input type="text" value={draft.tags} onChange={handleChange('tags')} />
           </label>
           <label className="form-field">
-            Download link
+            Download link (optional)
             <input
               type="text"
               value={draft.digital_file_url}
               onChange={handleChange('digital_file_url')}
+              placeholder="Optional: paste an existing link"
             />
           </label>
           <label className="form-field">

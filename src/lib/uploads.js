@@ -34,3 +34,15 @@ export const uploadFileAndGetUrl = async ({ file, bucket, folder }) => {
   const { data } = supabase.storage.from(bucket).getPublicUrl(path)
   return data?.publicUrl || ''
 }
+
+export const uploadFilesAndGetUrls = async ({ files, bucket, folder }) => {
+  if (!files || files.length === 0) return []
+
+  const fileList = Array.isArray(files) ? files : Array.from(files)
+  const uploads = fileList.map((file) =>
+    uploadFileAndGetUrl({ file, bucket, folder }),
+  )
+
+  const urls = await Promise.all(uploads)
+  return urls.filter(Boolean)
+}
