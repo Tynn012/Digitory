@@ -97,9 +97,12 @@ export const saveProduct = async (product) => {
       return normalizeProduct(data)
     }
 
+    const insertPayload = { ...payload }
+    if (!insertPayload.id) delete insertPayload.id
+
     const { data, error } = await supabase
       .from('products')
-      .insert([{ ...payload }])
+      .insert([insertPayload])
       .select()
       .single()
 
