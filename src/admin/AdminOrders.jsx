@@ -18,6 +18,22 @@ const AdminOrders = () => {
   const [error, setError] = useState('')
   const [showArchived, setShowArchived] = useState(false)
 
+  const replaceOrder = (nextOrder) => {
+    if (!nextOrder) return
+    setOrders((prev) =>
+      prev.map((item) =>
+        item.id === nextOrder.id ? { ...item, ...nextOrder } : item,
+      ),
+    )
+  }
+
+  const ensureEditable = (order) => {
+    if (!order?.archived) return true
+    setNotice('')
+    setError('Archived orders are read-only.')
+    return false
+  }
+
   useEffect(() => {
     fetchOrders({ includeArchived: true })
       .then((data) => {
@@ -27,12 +43,13 @@ const AdminOrders = () => {
       .catch(() => setLoading(false))
   }, [])
 
-  const handleUpdate = async (id, updates) => {
+  const handleUpdate = async (order, updates) => {
+    if (!ensureEditable(order)) return
     setNotice('')
     setError('')
     try {
-      const updated = await updateOrder(id, updates)
-      setOrders((prev) => prev.map((item) => (item.id === id ? updated : item)))
+      const updated = await updateOrder(order.id, updates)
+      replaceOrder(updated)
       if (updates.status === 'rejected') {
         setNotice('Order rejected.')
         return
@@ -47,14 +64,19 @@ const AdminOrders = () => {
     }
   }
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (order) => {
+    if (order.archived) {
+      setNotice('Order already archived.')
+      setError('')
+      return
+    }
     setNotice('')
     setError('')
     try {
-      await deleteOrder(id)
+      await deleteOrder(order.id)
       setOrders((prev) =>
         prev.map((item) =>
-          item.id === id ? { ...item, archived: true } : item,
+          item.id === order.id ? { ...item, archived: true } : item,
         ),
       )
       setNotice('Order archived.')
@@ -86,9 +108,7 @@ const AdminOrders = () => {
       }
 
       const updated = await updateOrder(order.id, { download_url: fallbackUrl })
-      setOrders((prev) =>
-        prev.map((item) => (item.id === order.id ? updated : item)),
-      )
+      replaceOrder(updated)
       return updated
     } catch {
       return order
@@ -96,6 +116,7 @@ const AdminOrders = () => {
   }
 
   const handleMarkPaid = async (order) => {
+    if (!ensureEditable(order)) return
     if (
       typeof window !== 'undefined' &&
       !window.confirm('Mark this order as paid and unlock the download?')
@@ -114,9 +135,7 @@ const AdminOrders = () => {
         download_unlocked: true,
         download_token: downloadToken,
       })
-      setOrders((prev) =>
-        prev.map((item) => (item.id === order.id ? updated : item)),
-      )
+      replaceOrder(updated)
       setNotice('Payment marked as paid. Send receipt when ready.')
     } catch (err) {
       setError(err.message || 'Unable to mark as paid.')
@@ -124,6 +143,7 @@ const AdminOrders = () => {
   }
 
   const handleSendReceipt = async (order) => {
+    if (!ensureEditable(order)) return
     setNotice('')
     setError('')
 
@@ -145,9 +165,7 @@ const AdminOrders = () => {
         updatedOrder = await updateOrder(order.id, {
           download_token: downloadToken,
         })
-        setOrders((prev) =>
-          prev.map((item) => (item.id === order.id ? updatedOrder : item)),
-        )
+        replaceOrder(updatedOrder)
       }
 
       updatedOrder = await ensureDownloadLink(updatedOrder)
@@ -168,9 +186,7 @@ const AdminOrders = () => {
       const withReceipt = await updateOrder(order.id, {
         receipt_sent_at: new Date().toISOString(),
       })
-      setOrders((prev) =>
-        prev.map((item) => (item.id === order.id ? withReceipt : item)),
-      )
+      replaceOrder(withReceipt)
       setNotice('Receipt sent to buyer.')
     } catch (err) {
       setError(err.message || 'Unable to send receipt.')
@@ -235,6 +251,7 @@ const AdminOrders = () => {
                 <button
                   type="button"
                   className="button ghost"
+                  disabled={order.archived}
                   onClick={() => handleMarkPaid(order)}
                 >
                   Mark paid
@@ -242,8 +259,9 @@ const AdminOrders = () => {
                 <button
                   type="button"
                   className="button ghost"
+                  disabled={order.archived}
                   onClick={() =>
-                    handleUpdate(order.id, { download_unlocked: true })
+                    handleUpdate(order, { download_unlocked: true })
                   }
                 >
                   Unlock
@@ -251,6 +269,7 @@ const AdminOrders = () => {
                 <button
                   type="button"
                   className="button ghost"
+                  disabled={order.archived}
                   onClick={() => handleSendReceipt(order)}
                 >
                   Send receipt
@@ -258,14 +277,16 @@ const AdminOrders = () => {
                 <button
                   type="button"
                   className="button ghost"
-                  onClick={() => handleUpdate(order.id, { status: 'rejected' })}
+                  disabled={order.archived}
+                  onClick={() => handleUpdate(order, { status: 'rejected' })}
                 >
                   Reject
                 </button>
                 <button
                   type="button"
                   className="button ghost danger"
-                  onClick={() => handleDelete(order.id)}
+                  disabled={order.archived}
+                  onClick={() => handleDelete(order)}
                 >
                   Archive
                 </button>
