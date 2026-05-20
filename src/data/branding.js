@@ -11,6 +11,6 @@ export const defaultBranding = {
 }
 
 export const paymentDetails = {
-  gcash_number: '0969 177 9124',
+  gcash_number: '0969 148 6972',
   gcash_name: 'Digitory Digital Goods',
 }
