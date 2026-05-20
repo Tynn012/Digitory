@@ -43,6 +43,7 @@ create table if not exists public.orders (
   download_url text,
   payment_method text default 'manual_gcash',
   receipt_sent_at timestamptz,
+  archived boolean not null default false,
   metadata jsonb default '{}'::jsonb
 );
 

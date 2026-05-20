@@ -16,9 +16,10 @@ const AdminOrders = () => {
   const [loading, setLoading] = useState(true)
   const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
+  const [showArchived, setShowArchived] = useState(false)
 
   useEffect(() => {
-    fetchOrders()
+    fetchOrders({ includeArchived: true })
       .then((data) => {
         setOrders(data)
         setLoading(false)
@@ -51,10 +52,14 @@ const AdminOrders = () => {
     setError('')
     try {
       await deleteOrder(id)
-      setOrders((prev) => prev.filter((item) => item.id !== id))
-      setNotice('Order deleted.')
+      setOrders((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, archived: true } : item,
+        ),
+      )
+      setNotice('Order archived.')
     } catch (err) {
-      setError(err.message || 'Unable to delete order.')
+      setError(err.message || 'Unable to archive order.')
     }
   }
 
@@ -181,14 +186,25 @@ const AdminOrders = () => {
     )
   }
 
+  const visibleOrders = showArchived
+    ? orders
+    : orders.filter((order) => !order.archived)
+
   return (
     <section className="admin-card">
       <h3>Orders</h3>
+      <button
+        type="button"
+        className="button ghost"
+        onClick={() => setShowArchived((prev) => !prev)}
+      >
+        {showArchived ? 'Hide archived' : 'Show archived'}
+      </button>
       {notice && <div className="success-card">{notice}</div>}
       {error && <p className="form-error">{error}</p>}
-      {orders.length ? (
+      {visibleOrders.length ? (
         <div className="order-table">
-          {orders.map((order) => (
+          {visibleOrders.map((order) => (
             <div key={order.id} className="order-row">
               <div>
                 <h4>{order.product_title || 'Untitled product'}</h4>
@@ -200,6 +216,7 @@ const AdminOrders = () => {
                   {order.status}
                 </span>
                 <p className="muted">{formatDate(order.created_at)}</p>
+                {order.archived && <p className="muted">Archived</p>}
                 {order.receipt_sent_at && (
                   <p className="muted">
                     Receipt sent {formatDate(order.receipt_sent_at)}
@@ -250,7 +267,7 @@ const AdminOrders = () => {
                   className="button ghost danger"
                   onClick={() => handleDelete(order.id)}
                 >
-                  Delete
+                  Archive
                 </button>
               </div>
             </div>

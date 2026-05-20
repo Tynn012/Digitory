@@ -57,6 +57,7 @@ const createOrderPayload = (payload) => {
     download_url: payload.download_url ? payload.download_url.trim() : '',
     payment_method: payload.payment_method || 'manual_gcash',
     receipt_sent_at: payload.receipt_sent_at || null,
+    archived: Boolean(payload.archived),
     metadata: payload.metadata || {},
   }
 
@@ -145,22 +146,34 @@ export const createOrder = async (payload) => {
   return localOrder
 }
 
-export const fetchOrders = async () => {
+export const fetchOrders = async (options = {}) => {
+  const includeArchived = Boolean(options.includeArchived)
   if (isSupabaseConfigured && supabase) {
     try {
-      const { data, error } = await supabase
-        .from('orders')
-        .select('*')
-        .order('created_at', { ascending: false })
+      let query = supabase.from('orders').select('*')
+      if (!includeArchived) {
+        query = query.eq('archived', false)
+      }
+      const { data, error } = await query.order('created_at', {
+        ascending: false,
+      })
       if (error) throw error
       return data || []
     } catch (err) {
       // If Supabase fails, fall back to local seeded orders for development
-      return ensureLocalOrders()
+      const orders = ensureLocalOrders()
+      if (includeArchived) {
+        return orders
+      }
+      return orders.filter((order) => !order.archived)
     }
   }
 
-  return ensureLocalOrders()
+  const orders = ensureLocalOrders()
+  if (includeArchived) {
+    return orders
+  }
+  return orders.filter((order) => !order.archived)
 }
 
 export const updateOrder = async (id, updates) => {
@@ -186,13 +199,19 @@ export const updateOrder = async (id, updates) => {
 
 export const deleteOrder = async (id) => {
   if (isSupabaseConfigured && supabase) {
-    const { error } = await supabase.from('orders').delete().eq('id', id)
+    const { error } = await supabase
+      .from('orders')
+      .update({ archived: true, updated_at: new Date().toISOString() })
+      .eq('id', id)
     if (error) throw error
     return true
   }
 
   const orders = ensureLocalOrders()
-  const next = orders.filter((order) => order.id !== id)
+  const now = new Date().toISOString()
+  const next = orders.map((order) =>
+    order.id === id ? { ...order, archived: true, updated_at: now } : order,
+  )
   setStoredValue(STORAGE_KEY, next)
   return true
 }
