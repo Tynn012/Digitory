@@ -959,10 +959,64 @@ p {
   box-shadow: var(--shadow-soft);
 }
 
-.stat-grid {
+.stat-grid,
+.stats-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
+}
+
+.admin-card .card {
+  background: #f8faf8;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  min-width: 360px;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.table thead th {
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table td:first-child {
+  word-break: break-word;
+}
+
+.table th:nth-child(2),
+.table td:nth-child(2) {
+  text-align: center;
+  width: 90px;
+}
+
+.table th:last-child,
+.table td:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 .stat-card {
@@ -1272,7 +1326,8 @@ p {
     flex-direction: column;
   }
 
-  .stat-grid {
+  .stat-grid,
+  .stats-grid {
     grid-template-columns: 1fr;
   }
 }
