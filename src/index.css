@@ -526,11 +526,22 @@ p {
   overflow: hidden;
   background: #f4f4f1;
   padding: 12px;
+  display: grid;
+  place-items: center;
+  height: min(560px, 70vh);
+  min-height: 320px;
+}
+
+.gallery-main img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .gallery-thumbs {
   display: flex;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .gallery-thumbs button {
@@ -545,6 +556,12 @@ p {
 
 .gallery-thumbs button.active {
   outline: 2px solid var(--accent);
+}
+
+.gallery-thumbs img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
 }
 
 .checkout-grid {
