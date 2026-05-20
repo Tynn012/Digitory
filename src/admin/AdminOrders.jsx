@@ -85,6 +85,23 @@ const AdminOrders = () => {
     }
   }
 
+  const handleUnarchive = async (order) => {
+    if (!order.archived) {
+      setNotice('Order is already active.')
+      setError('')
+      return
+    }
+    setNotice('')
+    setError('')
+    try {
+      const updated = await updateOrder(order.id, { archived: false })
+      replaceOrder(updated)
+      setNotice('Order unarchived.')
+    } catch (err) {
+      setError(err.message || 'Unable to unarchive order.')
+    }
+  }
+
   const formatDate = (value) => {
     if (!value) return '—'
     return format(new Date(value), 'MMM d, yyyy')
@@ -282,14 +299,23 @@ const AdminOrders = () => {
                 >
                   Reject
                 </button>
-                <button
-                  type="button"
-                  className="button ghost danger"
-                  disabled={order.archived}
-                  onClick={() => handleDelete(order)}
-                >
-                  Archive
-                </button>
+                {order.archived ? (
+                  <button
+                    type="button"
+                    className="button ghost"
+                    onClick={() => handleUnarchive(order)}
+                  >
+                    Unarchive
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="button ghost danger"
+                    onClick={() => handleDelete(order)}
+                  >
+                    Archive
+                  </button>
+                )}
               </div>
             </div>
           ))}
