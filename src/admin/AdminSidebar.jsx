@@ -1,13 +1,26 @@
 import { NavLink } from 'react-router-dom'
+import { useState } from 'react'
 import { useBranding } from '../lib/branding'
 
 const AdminSidebar = ({ onSignOut }) => {
   const { branding } = useBranding()
+  const [logoError, setLogoError] = useState(false)
+  const brandName = branding.site_name || 'Digitory'
+  const showLogo = branding.logo_url && !logoError
 
   return (
     <aside className="admin-sidebar">
       <div className="admin-brand">
-        <span className="admin-brand-title">{branding.site_name || 'Digitory'}</span>
+        {showLogo ? (
+          <img
+            src={branding.logo_url}
+            alt={brandName}
+            className="admin-brand-logo"
+            onError={() => setLogoError(true)}
+          />
+        ) : (
+          <span className="admin-brand-title">{brandName}</span>
+        )}
         <span className="admin-subtitle">Admin Dashboard</span>
       </div>
       <nav className="admin-nav">

@@ -883,6 +883,13 @@ p {
   gap: 4px;
 }
 
+.admin-brand-logo {
+  width: 180px;
+  height: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+
 .admin-brand-title {
   font-family: var(--font-display);
   font-size: 24px;
