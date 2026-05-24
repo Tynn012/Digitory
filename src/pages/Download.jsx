@@ -76,7 +76,7 @@ const Download = () => {
 
   if (error || !order) {
     return (
-      <div className="section container">
+      <div className="section container download-page">
         <div className="notice-card">
           <h2>Download unavailable</h2>
           <p>{error || 'Enter the buyer email used for the purchase to continue.'}</p>

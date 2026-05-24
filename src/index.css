@@ -575,6 +575,14 @@ p {
   margin: 0 auto;
 }
 
+.download-page {
+  max-width: 720px;
+}
+
+.download-page .notice-card {
+  width: 100%;
+}
+
 .checkout-card {
   background: var(--surface);
   border-radius: var(--radius-lg);
