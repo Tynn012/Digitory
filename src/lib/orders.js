@@ -2,6 +2,7 @@ import { supabase, isSupabaseConfigured } from './supabaseClient'
 import { getStoredValue, setStoredValue } from './storage'
 
 const STORAGE_KEY = 'digitory-orders'
+const DEFAULT_DOWNLOAD_LIMIT = 10
 
 const createDownloadToken = () => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -41,6 +42,12 @@ const ensureLocalOrders = () => {
 }
 
 const createOrderPayload = (payload) => {
+  const downloadLimit = Number(payload.download_limit || DEFAULT_DOWNLOAD_LIMIT)
+  const downloadCount =
+    payload.download_count === 0
+      ? 0
+      : Number(payload.download_count || downloadLimit || DEFAULT_DOWNLOAD_LIMIT)
+
   const order = {
     product_id: payload.product_id || null,
     product_slug: payload.product_slug || '',
@@ -54,6 +61,8 @@ const createOrderPayload = (payload) => {
     paid_at: payload.paid_at || null,
     download_unlocked: Boolean(payload.download_unlocked),
     download_token: payload.download_token || createDownloadToken(),
+    download_limit: downloadLimit || DEFAULT_DOWNLOAD_LIMIT,
+    download_count: downloadCount || downloadLimit || DEFAULT_DOWNLOAD_LIMIT,
     download_url: payload.download_url ? payload.download_url.trim() : '',
     payment_method: payload.payment_method || 'manual_gcash',
     receipt_sent_at: payload.receipt_sent_at || null,
@@ -216,13 +225,21 @@ export const deleteOrder = async (id) => {
   return true
 }
 
-export const fetchDownloadDetails = async (token) => {
+export const fetchDownloadDetails = async (token, email) => {
+  return fetchDownloadRequest(token, email, false)
+}
+
+export const fetchDownloadFile = async (token, email) => {
+  return fetchDownloadRequest(token, email, true)
+}
+
+const fetchDownloadRequest = async (token, email, consume) => {
   const response = await fetch('/api/get-download', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ token }),
+    body: JSON.stringify({ token, email, consume }),
   })
 
   const data = await response.json().catch(() => ({}))
@@ -232,4 +249,4 @@ export const fetchDownloadDetails = async (token) => {
   return data
 }
 
-export { createDownloadToken }
+export { createDownloadToken, DEFAULT_DOWNLOAD_LIMIT }

@@ -31,6 +31,10 @@ export const uploadFileAndGetUrl = async ({ file, bucket, folder }) => {
     throw uploadError
   }
 
+  if (bucket === 'product-files') {
+    return path
+  }
+
   const { data } = supabase.storage.from(bucket).getPublicUrl(path)
   return data?.publicUrl || ''
 }

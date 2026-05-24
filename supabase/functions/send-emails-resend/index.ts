@@ -99,7 +99,7 @@ Deno.serve(async (req: Request) => {
   }
 
   const downloadUrl = order.download_token
-    ? `${supabaseUrl.replace(/\/$/, '')}/functions/v1/download-proof?token=${encodeURIComponent(order.download_token)}`
+    ? `${SITE_URL.replace(/\/$/, '')}/download/${encodeURIComponent(order.download_token)}`
     : null
 
   if (!downloadUrl) {
@@ -114,11 +114,11 @@ Deno.serve(async (req: Request) => {
   const amount = order.amount != null ? order.amount.toString() : (payload.amount?.toString() || '')
 
   const subject = `Your receipt & download link: ${productTitle}`
-  const text = `Hi ${customerName},\n\nThanks for your purchase of \"${productTitle}\"!\n\nAmount: ${amount}\nDownload link: ${downloadUrl}\n\nIf you have any questions, reply to this email.\n\n— ${SITE_URL}`
+  const text = `Hi ${customerName},\n\nThanks for your purchase of \"${productTitle}\"! Open the link and verify with your purchase email to continue. This download can be used up to 10 times.\n\nAmount: ${amount}\nDownload link: ${downloadUrl}\n\nIf you have any questions, reply to this email.\n\n— ${SITE_URL}`
   const html = `
     <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #0f1c20;">
       <h2 style="margin: 0 0 12px;">Hi ${customerName},</h2>
-      <p style="margin: 0 0 12px;">Thanks for your purchase of <strong>${productTitle}</strong>.</p>
+      <p style="margin: 0 0 12px;">Thanks for your purchase of <strong>${productTitle}</strong>. Open the link and verify with your purchase email to continue. This download can be used up to 10 times.</p>
       <p style="margin: 0 0 12px;"><strong>Amount:</strong> ${amount}</p>
       <p style="margin: 16px 0;">
         <a href="${downloadUrl}" style="display: inline-block; padding: 12px 18px; background: #1bb3a8; color: #fff; text-decoration: none; border-radius: 999px;">

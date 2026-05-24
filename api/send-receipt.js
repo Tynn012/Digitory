@@ -53,7 +53,7 @@ export default async function handler(req, res) {
   const orderId = body.orderId
 
   if (!orderId) {
-    return res.status(400).json({ error: 'Missing orderId.' })
+       const text = `Hi ${safeName},\n\nThanks for your purchase! Your download is ready. Open the link and verify with your purchase email to continue.\n\nDownload: ${downloadLink}\n\nAmount: ${amount || ''}\n\nIf you need help, reply to this email.\n\n- Digitory`
   }
 
   const supabase = getSupabaseClient()
@@ -106,7 +106,6 @@ export default async function handler(req, res) {
   if (!baseUrl) {
     return res.status(500).json({ error: 'Missing site URL configuration.' })
   }
-
   const downloadLink = `${baseUrl}/download/${downloadToken}`
   const safeTitle = order.product_title || body.productTitle || 'your purchase'
   const safeName = order.customer_name || body.customerName || 'there'
@@ -114,13 +113,13 @@ export default async function handler(req, res) {
   const amountText = amount != null ? amount.toString() : ''
 
   const subject = `Your Digitory receipt: ${safeTitle}`
-  const text = `Hi ${safeName},\n\nThanks for your purchase of "${safeTitle}". Your payment is confirmed.\n\nAmount: ${amountText}\nDownload link (keep this private): ${downloadLink}\n\nIf you have any questions, reply to this email.\n\n- Digitory`
+  const text = `Hi ${safeName},\n\nThanks for your purchase of "${safeTitle}". Your payment is confirmed. Open the link and verify with your purchase email to continue. This download can be used up to 10 times.\n\nAmount: ${amountText}\nDownload link (keep this private): ${downloadLink}\n\nIf you have any questions, reply to this email.\n\n- Digitory`
   const html = `
     <div style="background: #f6f7f5; padding: 24px; font-family: Arial, sans-serif; color: #0f1c20;">
       <div style="max-width: 640px; margin: 0 auto; background: #ffffff; border-radius: 20px; border: 1px solid #e7e7e0; padding: 28px;">
         <p style="margin: 0 0 12px; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #1bb3a8; font-weight: 700;">Digitory</p>
         <h2 style="margin: 0 0 8px;">Receipt and download link</h2>
-        <p style="margin: 0 0 16px; color: #5a6466;">Hi ${safeName}, thanks for your purchase. Your payment is confirmed.</p>
+        <p style="margin: 0 0 16px; color: #5a6466;">Hi ${safeName}, thanks for your purchase. Your payment is confirmed. Open the link and verify with your purchase email to continue. This download can be used up to 10 times.</p>
 
         <div style="border: 1px solid #e7e7e0; border-radius: 14px; padding: 16px; background: #fafaf9; margin: 16px 0;">
           <table width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse; font-size: 14px;">

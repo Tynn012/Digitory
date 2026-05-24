@@ -40,6 +40,8 @@ create table if not exists public.orders (
   paid_at timestamptz,
   download_unlocked boolean default false,
   download_token text unique,
+  download_limit integer not null default 10,
+  download_count integer not null default 10,
   download_url text,
   payment_method text default 'manual_gcash',
   receipt_sent_at timestamptz,
@@ -64,6 +66,12 @@ create table if not exists public.branding (
 -- Indexes
 create unique index if not exists orders_download_token_idx on public.orders (download_token);
 
+alter table public.orders
+  add column if not exists download_limit integer not null default 10;
+
+alter table public.orders
+  add column if not exists download_count integer not null default 10;
+
 -- Trigger helper to set updated_at
 create or replace function public.set_updated_at()
 returns trigger as $$
@@ -72,6 +80,40 @@ begin
   return new;
 end;
 $$ language plpgsql;
+
+create or replace function public.consume_download_attempt(p_download_token text, p_buyer_email text)
+returns table (
+  id uuid,
+  product_title text,
+  amount numeric(10,2),
+  customer_name text,
+  buyer_email text,
+  download_unlocked boolean,
+  download_url text,
+  download_limit integer,
+  download_count integer
+) as $$
+begin
+  return query
+  update public.orders as o
+  set download_count = greatest(coalesce(o.download_count, coalesce(o.download_limit, 10)) - 1, 0),
+      updated_at = now()
+  where o.download_token = p_download_token
+    and lower(coalesce(o.buyer_email, '')) = lower(coalesce(p_buyer_email, ''))
+    and o.download_unlocked = true
+    and coalesce(o.download_count, coalesce(o.download_limit, 10)) > 0
+  returning
+    o.id,
+    o.product_title,
+    o.amount,
+    o.customer_name,
+    o.buyer_email,
+    o.download_unlocked,
+    o.download_url,
+    coalesce(o.download_limit, 10),
+    o.download_count;
+end;
+$$ language plpgsql security definer;
 
 create trigger set_products_updated_at
 before update on public.products
@@ -166,10 +208,14 @@ create policy "Branding is editable by authenticated users"
 insert into storage.buckets (id, name, public)
 values
   ('product-media', 'product-media', true),
-  ('product-files', 'product-files', true),
+  ('product-files', 'product-files', false),
   ('order-proofs', 'order-proofs', true)
 on conflict (id) do update
 set public = excluded.public;
+
+update storage.buckets
+set public = false
+where id = 'product-files';
 
 -- Storage policies: allow authenticated admin users to insert/update objects in the buckets
 drop policy if exists "Admins can manage product media" on storage.objects;

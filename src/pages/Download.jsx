@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { fetchDownloadDetails } from '../lib/orders'
+import { DEFAULT_DOWNLOAD_LIMIT, fetchDownloadDetails, fetchDownloadFile } from '../lib/orders'
 import { formatPrice } from '../lib/format'
 
 const Download = () => {
@@ -8,6 +8,9 @@ const Download = () => {
   const [order, setOrder] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [email, setEmail] = useState('')
+  const [emailSubmitted, setEmailSubmitted] = useState(false)
+  const [downloading, setDownloading] = useState(false)
 
   useEffect(() => {
     if (!token) {
@@ -16,7 +19,12 @@ const Download = () => {
       return
     }
 
-    fetchDownloadDetails(token)
+    if (!emailSubmitted) {
+      setLoading(false)
+      return
+    }
+
+    fetchDownloadDetails(token, email)
       .then((data) => {
         setOrder(data?.order || null)
         setLoading(false)
@@ -25,7 +33,37 @@ const Download = () => {
         setError(err.message || 'Unable to load download.')
         setLoading(false)
       })
-  }, [token])
+  }, [token, emailSubmitted, email])
+
+  const handleVerify = (event) => {
+    event.preventDefault()
+    setError('')
+    setOrder(null)
+    setLoading(true)
+    setEmailSubmitted(true)
+  }
+
+  const handleDownload = async () => {
+    if (!token || !email) return
+
+    setDownloading(true)
+    setError('')
+
+    try {
+      const data = await fetchDownloadFile(token, email)
+      const downloadUrl = data?.order?.download_url
+
+      if (!downloadUrl) {
+        throw new Error('Unable to prepare the download link.')
+      }
+
+      window.location.assign(downloadUrl)
+    } catch (err) {
+      setError(err.message || 'Unable to start the download.')
+    } finally {
+      setDownloading(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -41,8 +79,36 @@ const Download = () => {
       <div className="section container">
         <div className="notice-card">
           <h2>Download unavailable</h2>
-          <p>{error || 'This download link is invalid or expired.'}</p>
-          <Link to="/products" className="button primary">
+          <p>{error || 'Enter the buyer email used for the purchase to continue.'}</p>
+          {!emailSubmitted ? (
+            <form onSubmit={handleVerify} className="form-grid">
+              <label className="form-field">
+                Purchase email
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  required
+                />
+              </label>
+              <button type="submit" className="button primary">
+                Verify download
+              </button>
+            </form>
+          ) : (
+            <button
+              type="button"
+              className="button primary"
+              onClick={() => {
+                setEmailSubmitted(false)
+                setOrder(null)
+                setError('')
+              }}
+            >
+              Try another email
+            </button>
+          )}
+          <Link to="/products" className="button ghost">
             Browse products
           </Link>
         </div>
@@ -69,15 +135,15 @@ const Download = () => {
             <span>{formatPrice(order.amount)}</span>
           </div>
           <div className="download-actions">
-            {order.download_unlocked && order.download_url ? (
-              <a
+            {order.download_unlocked ? (
+              <button
+                type="button"
                 className="button primary"
-                href={order.download_url}
-                target="_blank"
-                rel="noreferrer"
+                onClick={handleDownload}
+                disabled={downloading || Number(order.download_count || 0) <= 0}
               >
-                Download file
-              </a>
+                {downloading ? 'Preparing download...' : 'Download file'}
+              </button>
             ) : (
               <span className="muted">Download link will appear here.</span>
             )}
@@ -85,6 +151,11 @@ const Download = () => {
               Back to store
             </Link>
           </div>
+          <p className="muted">
+            {Number(order.download_count || 0) > 0
+              ? `${Math.min(Number(order.download_count || 0), DEFAULT_DOWNLOAD_LIMIT)} of ${order.download_limit || DEFAULT_DOWNLOAD_LIMIT} downloads remaining.`
+              : 'Your download limit has been reached.'}
+          </p>
         </div>
       </div>
     </div>
