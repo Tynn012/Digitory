@@ -91,7 +91,7 @@ const Download = () => {
                   required
                 />
               </label>
-              <button type="submit" className="button primary">
+              <button type="submit" className="button primary download-verify-button">
                 Verify download
               </button>
             </form>
