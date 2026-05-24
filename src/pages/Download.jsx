@@ -91,26 +91,33 @@ const Download = () => {
                   required
                 />
               </label>
-              <button type="submit" className="button primary download-verify-button">
-                Verify download
-              </button>
+              <div className="download-card-actions">
+                <button type="submit" className="button primary">
+                  Verify download
+                </button>
+                <Link to="/products" className="button ghost">
+                  Browse products
+                </Link>
+              </div>
             </form>
           ) : (
-            <button
-              type="button"
-              className="button primary"
-              onClick={() => {
-                setEmailSubmitted(false)
-                setOrder(null)
-                setError('')
-              }}
-            >
-              Try another email
-            </button>
+            <div className="download-card-actions">
+              <button
+                type="button"
+                className="button primary"
+                onClick={() => {
+                  setEmailSubmitted(false)
+                  setOrder(null)
+                  setError('')
+                }}
+              >
+                Try another email
+              </button>
+              <Link to="/products" className="button ghost">
+                Browse products
+              </Link>
+            </div>
           )}
-          <Link to="/products" className="button ghost">
-            Browse products
-          </Link>
         </div>
       </div>
     )

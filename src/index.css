@@ -583,9 +583,15 @@ p {
   width: 100%;
 }
 
-.download-verify-button {
-  width: fit-content;
-  justify-self: start;
+.download-card-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.download-card-actions .button {
+  min-width: 160px;
 }
 
 .checkout-card {
