@@ -23,7 +23,9 @@ Digitory is a premium digital marketplace and admin dashboard for selling templa
 
 ## Supabase setup
 1. Run the SQL in supabase/schema.sql to create tables and policies.
-2. Create a public storage bucket named order-proofs if you want to store payment proof uploads.
+2. Create the storage buckets used by the app:
+	- `order-proofs` (public) for payment proof uploads
+	- `product-files` (private) for downloadable product files
 3. Add your admin email to VITE_ADMIN_EMAILS (comma-separated) for allowlisted access.
 4. Enable MFA (TOTP) in Supabase Auth settings for admin sign-in.
 
