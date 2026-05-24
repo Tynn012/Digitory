@@ -20,11 +20,43 @@ const getSupabaseClient = () => {
 
 const isExternalUrl = (value) => /^https?:\/\//i.test(String(value || ''))
 
+const extractStoragePath = (value) => {
+  const rawValue = String(value || '').trim()
+  if (!rawValue) return ''
+
+  const publicPrefix = '/storage/v1/object/public/product-files/'
+  const publicIndex = rawValue.indexOf(publicPrefix)
+  if (publicIndex !== -1) {
+    return rawValue.slice(publicIndex + publicPrefix.length)
+  }
+
+  const signedPrefix = '/storage/v1/object/sign/product-files/'
+  const signedIndex = rawValue.indexOf(signedPrefix)
+  if (signedIndex !== -1) {
+    return rawValue.slice(signedIndex + signedPrefix.length).split('?')[0]
+  }
+
+  return rawValue
+}
+
 const resolveDownloadUrl = async (supabase, downloadUrl) => {
   if (!downloadUrl) return ''
 
   if (isExternalUrl(downloadUrl)) {
-    return downloadUrl
+    const storagePath = extractStoragePath(downloadUrl)
+    if (!storagePath || storagePath === downloadUrl) {
+      return downloadUrl
+    }
+
+    const { data, error } = await supabase.storage
+      .from('product-files')
+      .createSignedUrl(storagePath, 300)
+
+    if (error) {
+      throw error
+    }
+
+    return data?.signedUrl || ''
   }
 
   const { data, error } = await supabase.storage
